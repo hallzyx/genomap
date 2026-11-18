@@ -55,9 +55,9 @@ section[id] { scroll-margin-top: 1.5rem; }
   display: inline-flex; align-items: center; gap: .5rem; min-height: 44px;
   font-weight: 650; text-decoration: none;
 }
-.mast-cta { padding: .4rem .85rem; border: 1px solid #968f9e; border-radius: 3px; }
+.mast-cta { padding: .4rem .85rem; border: 1px solid var(--ink); border-radius: 3px; background: var(--accent); }
 .site-nav a:hover, .text-link:hover { text-decoration: underline; }
-.mast-cta:hover { background: var(--white); }
+.mast-cta:hover { background: #e8ff9a; }
 
 .hero {
   display: grid; grid-template-columns: minmax(0, .87fr) minmax(0, 1.13fr);
@@ -254,7 +254,9 @@ h3 { font-size: 1.35rem; line-height: 1.12; letter-spacing: -.035em; }
   }
   .masthead .brand { grid-column: 1 / -1; }
   .site-nav { gap: .75rem; font-size: .88rem; }
-  .mast-cta { display: none; }
+  .masthead-actions { gap: .4rem; }
+  .mast-cta { padding-inline: .48rem; gap: .28rem; font-size: .82rem; }
+  .site-nav { flex-wrap: wrap; row-gap: 0; }
   .hero, .field, .story-inner, .sample-inner, .wallet { grid-template-columns: 1fr; }
   .hero { gap: 1.8rem; }
   h1 { font-size: clamp(4rem, 11.5vw, 5.75rem); }
