@@ -39,13 +39,24 @@ section[id] { scroll-margin-top: 1.5rem; }
   letter-spacing: -.065em; text-decoration: none; white-space: nowrap; min-height: 44px;
 }
 .brand span { color: #654cb9; margin-inline-start: -.52rem; }
-.masthead nav { display: flex; gap: clamp(1rem, 3vw, 3.5rem); }
-.masthead nav a, .mast-cta, .text-link {
+.site-nav { display: flex; gap: clamp(1rem, 3vw, 3.5rem); }
+.masthead-actions { display: flex; align-items: center; gap: 1rem; }
+.language-switch {
+  display: inline-flex; padding: 2px; border: 1px solid var(--line);
+  border-radius: 4px; font: 700 .78rem/1 var(--mono);
+}
+.language-switch a {
+  display: grid; place-items: center; min-width: 44px; min-height: 44px;
+  border-radius: 2px; color: var(--muted); text-decoration: none;
+}
+.language-switch a:hover { background: var(--white); color: var(--ink); }
+.language-switch a[aria-current="page"] { background: var(--ink); color: var(--white); }
+.site-nav a, .mast-cta, .text-link {
   display: inline-flex; align-items: center; gap: .5rem; min-height: 44px;
   font-weight: 650; text-decoration: none;
 }
 .mast-cta { padding: .4rem .85rem; border: 1px solid #968f9e; border-radius: 3px; }
-.masthead nav a:hover, .text-link:hover { text-decoration: underline; }
+.site-nav a:hover, .text-link:hover { text-decoration: underline; }
 .mast-cta:hover { background: var(--white); }
 
 .hero {
@@ -187,9 +198,13 @@ h3 { font-size: 1.35rem; line-height: 1.12; letter-spacing: -.035em; }
 }
 @media (max-width: 680px) {
   .wrap { width: calc(100% - 2rem); }
-  .masthead { min-height: 4rem; }
-  .masthead nav { gap: .75rem; font-size: .85rem; }
-  .mast-cta { font-size: .82rem; }
+  .masthead {
+    display: grid; grid-template-columns: 1fr auto; gap: .2rem .5rem;
+    min-height: 4rem; padding-block: .42rem;
+  }
+  .masthead .brand { grid-column: 1 / -1; }
+  .site-nav { gap: .75rem; font-size: .88rem; }
+  .mast-cta { display: none; }
   .hero, .field, .sample-inner, .wallet { grid-template-columns: 1fr; }
   .hero { gap: 1.8rem; }
   h1 { font-size: clamp(4rem, 11.5vw, 5.75rem); }
@@ -198,10 +213,6 @@ h3 { font-size: 1.35rem; line-height: 1.12; letter-spacing: -.035em; }
   .coordinate-strip { font-size: .6rem; }
   .footer { display: grid; grid-template-columns: 1fr auto; gap: .1rem .6rem; padding-block: .65rem; }
   .footer p { grid-row: 2; grid-column: 1 / -1; }
-}
-@media (max-width: 480px) {
-  .masthead { display: grid; grid-template-columns: 1fr auto; gap: .2rem .5rem; padding-block: .42rem; }
-  .masthead .brand { grid-column: 1 / -1; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

@@ -1,81 +1,88 @@
 <!doctype html>
-<html lang="en">
+<html lang="es-PE">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f5f1e7">
-  <meta name="description" content="GenoMap is a learning portfolio for the Stellar ecosystem. Map the events you attend and share the proof.">
-  <title>GenoMap — Map your proof</title>
+  <meta name="description" content="GenoMap reúne las constancias de los eventos de blockchain a los que asistes en un perfil que puedes compartir.">
+  <title>GenoMap — Cada paso deja una huella</title>
   <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles.css">
+  <link rel="alternate" hreflang="en" href="./en/index.html">
 </head>
 <body>
-  <a class="skip" href="#main">Skip to content</a>
+  <a class="skip" href="#main">Saltar al contenido</a>
   <header class="masthead wrap" id="top">
-    <a class="brand" href="#top" aria-label="GenoMap home"><img src="assets/mark.svg" alt="" width="32" height="32">GenoMap<span>.</span></a>
-    <nav aria-label="Main navigation">
-      <a href="#field-guide">How it works</a>
-      <a href="#wallet">Wallet guide</a>
+    <a class="brand" href="#top" aria-label="Inicio de GenoMap"><img src="assets/mark.svg" alt="" width="32" height="32">GenoMap<span>.</span></a>
+    <nav class="site-nav" aria-label="Navegación principal">
+      <a href="#field-guide">Cómo funciona</a>
+      <a href="#wallet">Guía de billetera</a>
     </nav>
-    <a class="mast-cta" href="#sample">Sample profile <span aria-hidden="true">↗</span></a>
+    <div class="masthead-actions">
+      <a class="mast-cta" href="#sample">Perfil de ejemplo <span aria-hidden="true">↗</span></a>
+      <nav class="language-switch" aria-label="Idioma">
+        <a href="./index.html" hreflang="es-PE" lang="es-PE" aria-label="Español" aria-current="page">ES</a>
+        <a href="./en/index.html" hreflang="en" lang="en" aria-label="English">EN</a>
+      </nav>
+    </div>
   </header>
   <main id="main">
     <section class="hero wrap" aria-labelledby="hero-title">
       <div class="hero-copy">
-        <p class="eyebrow"><span class="signal-dot"></span> Stellar pilot <span class="slash">/</span> Peru</p>
-        <h1 id="hero-title">Every step<br> leaves a <em>signal.</em></h1>
-        <p class="intro">Your first meetup shouldn't disappear into a guest list. GenoMap is a shareable record of the events you attend, backed by credentials from the people who ran them.</p>
+        <p class="eyebrow"><span class="signal-dot"></span> Piloto en Perú <span class="slash">/</span> Stellar</p>
+        <h1 id="hero-title">Cada paso<br> deja una <em>huella.</em></h1>
+        <p class="intro">Cuando vas a un taller o encuentro de blockchain, el equipo que lo organiza puede confirmar que estuviste allí. GenoMap reúne esas constancias en un perfil que puedes compartir: el mapa de un recorrido que es solo tuyo.</p>
         <div class="hero-actions">
-          <a class="button" href="#sample">Explore a sample profile <span aria-hidden="true">↗</span></a>
-          <a class="text-link" href="#field-guide">How it works <span aria-hidden="true">↓</span></a>
+          <a class="button" href="#sample">Ver un perfil de ejemplo <span aria-hidden="true">↗</span></a>
+          <a class="text-link" href="#field-guide">Cómo funciona <span aria-hidden="true">↓</span></a>
         </div>
-        <p class="hero-note">No wallet needed to explore.</p>
+        <p class="hero-note">No necesitas una billetera para explorar.</p>
       </div>
       <figure class="atlas">
-        <figcaption class="atlas-label"><span>FIG. 01 <span class="slash">/</span> SIGNAL ATLAS</span><span class="crosshair" aria-hidden="true">+</span></figcaption>
-        <img src="assets/signal-atlas.svg" alt="A luminous route connects three checkpoints across a folded topographic grid." width="720" height="570">
-        <div class="atlas-caption"><span><i class="signal-dot"></i> Learning trajectory</span><span>ILLUSTRATIVE MAP</span></div>
+        <figcaption class="atlas-label"><span>FIG. 01 <span class="slash">/</span> MAPA DE HITOS</span><span class="crosshair" aria-hidden="true">+</span></figcaption>
+        <img src="assets/signal-atlas.svg" alt="Una ruta luminosa une tres puntos, uno por evento, en un mapa topográfico." width="720" height="570">
+        <div class="atlas-caption"><span><i class="signal-dot"></i> Cada punto, un evento</span><span>MAPA ILUSTRATIVO</span></div>
       </figure>
     </section>
 
-    <div class="coordinate-strip" aria-label="GenoMap design principles">
-      <div class="wrap strip-inner"><span>01 / Organizer-issued</span><span>02 / Stellar-verifiable</span><span>03 / Yours to share</span></div>
+    <div class="coordinate-strip">
+      <div class="wrap strip-inner"><span>01 / Emite el organizador</span><span>02 / Verificable en Stellar</span><span>03 / Tú decides compartir</span></div>
     </div>
 
     <section class="field wrap" id="field-guide" aria-labelledby="field-title">
       <div class="field-heading">
-        <p class="eyebrow">01 / Field guide</p>
-        <h2 id="field-title">From check-in<br> to track record.</h2>
-        <p>The pilot starts with attendance. You show up; your organizer makes it count.</p>
+        <p class="eyebrow">01 / Paso a paso</p>
+        <h2 id="field-title">De la asistencia<br> a tu perfil.</h2>
+        <p>El piloto empieza con constancias de asistencia para eventos participantes.</p>
       </div>
       <ol class="steps">
-        <li><span class="step-number" aria-hidden="true">01</span><div><h3>Show up.</h3><p>At the event, show your individual GenoMap QR. No QR? Staff can find your profile manually.</p></div></li>
-        <li><span class="step-number" aria-hidden="true">02</span><div><h3>Get the record.</h3><p>An approved organizer confirms attendance and issues the credential. Students don't need to sign every check-in.</p></div></li>
-        <li><span class="step-number" aria-hidden="true">03</span><div><h3>Share the path.</h3><p>Send one profile link. Recruiters can see what you attended, who issued each credential, and its proof on Stellar.</p></div></li>
+        <li><span class="step-number" aria-hidden="true">01</span><div><h3>Asiste al evento</h3><p>Muestra tu código QR personal de GenoMap. Si no lo tienes a mano, el equipo del evento puede buscar tu perfil.</p></div></li>
+        <li><span class="step-number" aria-hidden="true">02</span><div><h3>Recibe tu constancia</h3><p>Un organizador autorizado confirma tu asistencia y emite una constancia. No tienes que firmar para registrar tu asistencia.</p></div></li>
+        <li><span class="step-number" aria-hidden="true">03</span><div><h3>Comparte tu perfil</h3><p>Comparte el enlace con quien tú quieras. Por ejemplo, alguien que te entrevista puede ver a qué eventos asististe y verificar en Stellar quién emitió tus constancias.</p></div></li>
       </ol>
     </section>
 
     <section class="sample" id="sample" aria-labelledby="sample-title">
       <div class="wrap sample-inner">
         <div>
-          <p class="eyebrow">02 / Example profile</p>
-          <h2 id="sample-title">A portfolio with a paper trail.</h2>
-          <p>See how a learner's route comes together. Open a credential to see what a recruiter would be able to inspect.</p>
+          <p class="eyebrow">02 / Perfil de ejemplo</p>
+          <h2 id="sample-title">Así se ve tu trayectoria.</h2>
+          <p>Explora las constancias de Luna. Cada una muestra el evento, la fecha y quién confirmó su asistencia.</p>
         </div>
-        <article class="profile" aria-label="Fictional learner profile">
-          <div class="profile-meta"><span class="eyebrow">GenoMap profile</span><span class="sample-badge">Demo data</span></div>
+        <article class="profile" aria-label="Perfil ficticio de una estudiante">
+          <div class="profile-meta"><span class="eyebrow">Perfil de GenoMap</span><span class="sample-badge">Datos de ejemplo</span></div>
           <div class="identity">
             <span class="avatar" aria-hidden="true">LV</span>
-            <div><h3>Luna Vega</h3><p>Blockchain learner <span aria-hidden="true">·</span> Lima, Peru</p></div>
+            <div><h3>Luna Vega</h3><p>Estudiante de blockchain <span aria-hidden="true">·</span> Lima, Perú</p></div>
           </div>
-          <p class="sample-wallet">Stellar address <span>Hidden in this example</span></p>
+          <p class="sample-wallet">Dirección de Stellar <span>Oculta en este ejemplo</span></p>
           <details open>
-            <summary><span><small>Attendance</small>Build Night: First Smart Contract</span><span class="expand" aria-hidden="true"></span></summary>
-            <dl><div><dt>Issuer</dt><dd>Example Builders Club</dd></div><div><dt>Event date</dt><dd>18 July 2026</dd></div><div><dt>Stellar proof</dt><dd>Not issued. Demo only.</dd></div></dl>
+            <summary><span><small>Asistencia</small>Taller: mi primer contrato inteligente</span><span class="expand" aria-hidden="true"></span></summary>
+            <dl><div><dt>Emitida por</dt><dd>Club de Desarrollo (ejemplo)</dd></div><div><dt>Fecha del evento</dt><dd>18 de julio de 2026</dd></div><div><dt>Prueba en Stellar</dt><dd>Ejemplo sin registro en Stellar.</dd></div></dl>
           </details>
           <details>
-            <summary><span><small>Attendance</small>Open Source Meetup</span><span class="expand" aria-hidden="true"></span></summary>
-            <dl><div><dt>Issuer</dt><dd>Example Tech Collective</dd></div><div><dt>Event date</dt><dd>6 June 2026</dd></div><div><dt>Stellar proof</dt><dd>Not issued. Demo only.</dd></div></dl>
+            <summary><span><small>Asistencia</small>Encuentro de código abierto</span><span class="expand" aria-hidden="true"></span></summary>
+            <dl><div><dt>Emitida por</dt><dd>Colectivo de Tecnología (ejemplo)</dd></div><div><dt>Fecha del evento</dt><dd>6 de junio de 2026</dd></div><div><dt>Prueba en Stellar</dt><dd>Ejemplo sin registro en Stellar.</dd></div></dl>
           </details>
         </article>
       </div>
@@ -83,22 +90,22 @@
 
     <section class="wallet wrap" id="wallet" aria-labelledby="wallet-title">
       <div>
-        <p class="eyebrow">03 / Wallet guide</p>
-        <h2 id="wallet-title">Your wallet stays yours.</h2>
-        <p>For the pilot, you'll only need to provide your public Stellar address. GenoMap won't create a wallet for you or ask for your password, private key, or recovery phrase.</p>
+        <p class="eyebrow">03 / Guía de billetera</p>
+        <h2 id="wallet-title">Tu billetera sigue siendo tuya.</h2>
+        <p>Para el piloto solo tendrás que compartir la dirección pública de tu billetera de Stellar. GenoMap no creará una por ti ni te pedirá tu contraseña, clave privada o frase de recuperación.</p>
       </div>
       <div class="wallet-card">
-        <span class="eyebrow"><span class="signal-dot"></span> New to Stellar?</span>
-        <h3>Set up your first wallet.</h3>
-        <p>Create it in Freighter, save your recovery phrase privately, then copy your public address.</p>
-        <a class="text-link" href="https://freighter.me/faq">Read the official Freighter guide <span aria-hidden="true">↗</span></a>
+        <span class="eyebrow"><span class="signal-dot"></span> ¿Primera vez en Stellar?</span>
+        <h3>Crea tu primera billetera</h3>
+        <p>Puedes crearla con Freighter. Guarda tu frase de recuperación en un lugar seguro y copia solo tu dirección pública.</p>
+        <a class="text-link" href="https://freighter.me/faq" hreflang="en">Lee la guía oficial de Freighter (en inglés) <span aria-hidden="true">↗</span></a>
       </div>
     </section>
   </main>
   <footer class="footer wrap">
-    <a class="brand" href="#top" aria-label="GenoMap home"><img src="assets/mark.svg" alt="" width="28" height="28">GenoMap<span>.</span></a>
-    <p class="eyebrow">An independent pilot for the Stellar ecosystem</p>
-    <a class="text-link" href="#top">Back to top <span aria-hidden="true">↑</span></a>
+    <a class="brand" href="#top" aria-label="Inicio de GenoMap"><img src="assets/mark.svg" alt="" width="28" height="28">GenoMap<span>.</span></a>
+    <p class="eyebrow">Un piloto independiente para la comunidad de Stellar</p>
+    <a class="text-link" href="#top">Volver al inicio <span aria-hidden="true">↑</span></a>
   </footer>
 </body>
 </html>
