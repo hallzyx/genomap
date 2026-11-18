@@ -143,6 +143,56 @@ h3 { font-size: 1.35rem; line-height: 1.12; letter-spacing: -.035em; }
 }
 .steps p, .wallet-card p { margin-top: .25rem; color: var(--muted); }
 
+.brand-story {
+  padding-block: clamp(2.8rem, 6.2vw, 5.8rem);
+  border-top: 1px solid var(--line); background: #eee9dd;
+}
+.story-inner {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(12rem, .36fr);
+  align-items: start; gap: clamp(1.35rem, 3vw, 2.7rem) clamp(1.5rem, 4vw, 4.5rem);
+}
+.story-heading { grid-column: 1 / -1; }
+.story-heading h2 { margin-bottom: 0; }
+.story-heading em {
+  color: #423466; font: italic 400 .92em/1 Georgia, serif; letter-spacing: -.065em;
+}
+.trace-art {
+  position: relative; overflow: clip; border-radius: 3px; background: var(--night);
+}
+.trace-art img { width: 100%; height: auto; }
+.trace-study figcaption {
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: .35rem .9rem;
+  padding-top: .8rem; color: var(--muted); font: 650 .66rem/1.4 var(--mono);
+  letter-spacing: .065em; text-transform: uppercase;
+}
+.name-key { margin: 0; border-bottom: 1px solid var(--line); }
+.name-key > div { padding-block: .9rem 1.05rem; border-top: 1px solid var(--line); }
+.name-key dt {
+  margin-bottom: .35rem; font: 745 clamp(1.55rem, 3vw, 2.4rem)/1 var(--display);
+  letter-spacing: -.04em;
+}
+.name-key dd, .story-note { color: var(--muted); }
+.story-note { margin-top: 1rem; font-size: .85rem; max-width: 36ch; }
+
+.trace-waypoint {
+  position: absolute; left: 92.6%; top: 39.8%; width: clamp(.6rem, 2%, 1.2rem);
+  aspect-ratio: 1; border: 1px solid var(--accent); border-radius: 50%;
+  opacity: 0; pointer-events: none; transform: translate(-50%, -50%) scale(1);
+}
+@keyframes trace-arrival {
+  35% { opacity: .85; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(2.6); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) and (animation-range: entry 5% cover 28%) {
+    .trace-waypoint {
+      animation: trace-arrival 1ms ease-out both;
+      animation-timeline: view();
+      animation-range: entry 5% cover 28%;
+    }
+  }
+}
+
 .sample {
   background:
     linear-gradient(0deg, rgba(178,182,234,.085) 1px, transparent 1px),
@@ -205,7 +255,7 @@ h3 { font-size: 1.35rem; line-height: 1.12; letter-spacing: -.035em; }
   .masthead .brand { grid-column: 1 / -1; }
   .site-nav { gap: .75rem; font-size: .88rem; }
   .mast-cta { display: none; }
-  .hero, .field, .sample-inner, .wallet { grid-template-columns: 1fr; }
+  .hero, .field, .story-inner, .sample-inner, .wallet { grid-template-columns: 1fr; }
   .hero { gap: 1.8rem; }
   h1 { font-size: clamp(4rem, 11.5vw, 5.75rem); }
   .atlas { min-height: 0; padding-block: 1rem; }
