@@ -1,1 +1,5 @@
 .playwright-mcp/
+.pilot-cache/
+.pilot-data/
+node_modules/
+dist/
