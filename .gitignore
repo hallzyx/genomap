@@ -1,5 +1,8 @@
 .playwright-mcp/
 .pilot-cache/
 .pilot-data/
+.env
+.env.*
+!/.env.example
 node_modules/
 dist/

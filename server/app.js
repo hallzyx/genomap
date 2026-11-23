@@ -44,7 +44,7 @@ export async function createPilot({ databasePath, origin, authSecret, chain = nu
   const inFlight = new Map();
   app.disable("x-powered-by");
   app.use((req, res, next) => {
-    // Bind the loopback service to the configured origin, including against DNS rebinding.
+    // Accept only the configured host, including when accessed through a reverse proxy.
     if (req.headers.host !== new URL(origin).host) {
       return res.status(421).end();
     }

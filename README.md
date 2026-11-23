@@ -7,17 +7,33 @@ GenoMap lets learners collect attendance records, approved organizers issue them
 Use Node.js 22.13 or newer. From the repository root on Windows:
 
 ```powershell
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 npm.cmd ci
 npm.cmd test
 npm.cmd run build
 npm.cmd start
 ```
 
+Keep `.env` private. Both `npm start` and `npm run bootstrap:moderator` load it from the project root. The file is optional, and server environment variables take precedence.
+
 Open [the Spanish landing page](http://127.0.0.1:4173/) or [the English landing page](http://127.0.0.1:4173/en/) and enter the pilot. The landing and pilot are React pages in the same Vite build, served by Express on the same origin as the API. Use the server URLs, not a `file://` URL: the original files under `app/` and `en/app/` are design previews only.
 
 - The default database is `.pilot-data/genomap.sqlite`. Set `GENOMAP_DB_PATH` to use a different file.
-- The server binds only to `127.0.0.1`. Set `GENOMAP_PORT` to change port, then use that port in the URL.
-- Without `GENOMAP_AUTH_SECRET`, the server generates a new signing secret at startup. Restarting requires signing in again; accounts and records remain in SQLite. Set your own strong secret in the local process environment to keep it stable.
+- The server binds to `127.0.0.1` by default. Set `GENOMAP_PORT` to change port, then use that port in the URL.
+- Without `GENOMAP_AUTH_SECRET`, the server generates a new signing secret at startup. Restarting requires signing in again; accounts and records remain in SQLite.
+
+## Configure a server
+
+Create a separate `.env` on the server. For a reverse proxy that terminates HTTPS:
+
+| Variable | Setting |
+| --- | --- |
+| `GENOMAP_PUBLIC_ORIGIN` | Exact public origin, such as `https://genomap.example.com`, with no path or trailing slash. |
+| `GENOMAP_AUTH_SECRET` | Stable, randomly generated secret of at least 32 characters. Keep it out of Git. |
+| `GENOMAP_HOST` | Keep `127.0.0.1` if the proxy can reach it; set `0.0.0.0` only if the proxy needs to reach the service over a private network. |
+| `GENOMAP_PORT` | Internal port; the default is `4173`. |
+
+Have the proxy preserve the public `Host` header. Do not expose the internal HTTP port directly to the Internet. Persist `.pilot-data/` (or the directory containing your configured SQLite path) across restarts.
 
 ## Try the roles
 
@@ -84,17 +100,17 @@ This mutates **SDF Stellar Testnet only**. It resolves the existing CLI identity
 
 On success the command prints a verified result with contract ID and transaction hashes. It also keeps a nonsecret journal at `.pilot-data/genomap-testnet-verification.json`. If the run stops after creating this journal, inspect the hashes on Testnet before doing anything else. The script will not repeat a submission or create a second deployment while the journal exists.
 
-To use that contract in the application, follow the same normal terminal session:
+To use an already verified contract, edit these entries in the application's private `.env` and restart it. This does not redeploy the contract:
 
-```powershell
-$env:GENOMAP_STELLAR_NETWORK = 'testnet'
-$env:GENOMAP_STELLAR_ISSUER_ALIAS = 'deployer2'
-$env:GENOMAP_STELLAR_CONTRACT_ID = '<verified contractId>'
-npm.cmd run build
-npm.cmd start
+```dotenv
+GENOMAP_STELLAR_NETWORK=testnet
+GENOMAP_STELLAR_ISSUER_ALIAS=deployer2
+GENOMAP_STELLAR_CONTRACT_ID=<verified contractId>
 ```
 
-Leave `GENOMAP_STELLAR_ISSUER_SECRET` unset. Leave `GENOMAP_STELLAR_RPC_URL` unset to select SDF's official HTTPS endpoint; no alternatives or redirects are accepted in this mode. Leave `GENOMAP_DB_PATH` unset: Testnet uses `.pilot-data/genomap-testnet.sqlite`, separate from the standalone database. Bootstrap a separate moderator and use fictional data in this database. Testnet has no production permanence and [resets periodically](https://developers.stellar.org/docs/networks#testnet-and-futurenet-data-reset); do not rely on these proofs for real attendance.
+The account running GenoMap must have Stellar CLI and the authorized publisher available under the configured alias. An alias in `.env` does not copy the signer from another machine. Do not put a Testnet seed in `.env`.
+
+Leave `GENOMAP_STELLAR_ISSUER_SECRET` and `GENOMAP_STELLAR_RPC_URL` unset in Testnet mode. The app uses SDF's official HTTPS endpoint and does not accept alternatives or redirects. Leave `GENOMAP_DB_PATH` unset: Testnet uses `.pilot-data/genomap-testnet.sqlite`, separate from the standalone database. Bootstrap a separate moderator and use fictional data in this database. Testnet has no production permanence and [resets periodically](https://developers.stellar.org/docs/networks#testnet-and-futurenet-data-reset); do not rely on these proofs for real attendance.
 
 ## Pilot limits
 

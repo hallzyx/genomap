@@ -11,7 +11,7 @@ const chain = createStellarAdapter({
   issuerAlias: process.env.GENOMAP_STELLAR_ISSUER_ALIAS,
 });
 const { app, db } = await createPilot({ ...config, chain });
-const server = app.listen(config.port, "127.0.0.1", () => console.log(`GenoMap pilot: ${config.origin}`));
+const server = app.listen(config.port, config.host, () => console.log(`GenoMap pilot: ${config.origin}`));
 for (const signal of ["SIGINT", "SIGTERM"]) {
   process.once(signal, () => server.close(() => db.close()));
 }
