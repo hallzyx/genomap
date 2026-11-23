@@ -8,6 +8,7 @@
     "build": "vite build",
     "start": "node server/start.js",
     "bootstrap:moderator": "node server/bootstrap.js",
+    "verify:testnet": "node scripts/verify-testnet.js",
     "test": "node --test server/pilot.test.js server/stellar.test.js"
   },
   "dependencies": {

@@ -79,7 +79,7 @@ export async function createPilot({ databasePath, origin, authSecret, chain = nu
   };
 
   app.get("/api/me", signedIn(null, (_req, res, user, profile) => {
-    res.json({ user, profile, chainEnabled: Boolean(chain) });
+    res.json({ user, profile, chainEnabled: Boolean(chain), chainNetwork: chain?.network ?? null });
   }));
   app.get("/api/me/qr.svg", signedIn(null, async (_req, res, _user, profile) => {
     const svg = await QRCode.toString(profile.code, { type: "svg", margin: 2 });
@@ -126,7 +126,7 @@ export async function createPilot({ databasePath, origin, authSecret, chain = nu
     const credential = recordId.test(req.params.id) && store.ownedCredential(user.id, req.params.id);
     if (!credential) refuse(404, "credential_missing", "No credential was found.");
     if (credential.hash) return res.json({ credential });
-    if (!chain) refuse(503, "chain_unavailable", "The local Stellar RPC is not configured.");
+    if (!chain) refuse(503, "chain_unavailable", "Stellar anchoring is not configured.");
     let anchoring = inFlight.get(credential.id);
     if (!anchoring) {
       anchoring = Promise.resolve().then(async () => {

@@ -72,6 +72,30 @@ An approved organizer can anchor an issued record when the adapter is configured
 
 The publisher is the platform’s local account, not a learner or organizer wallet. Anchoring shows the platform recorded an organizer’s attestation; it does not independently establish that a learner attended. See the [contract notes](contracts/attendance/README.md) for storage lifetime considerations.
 
+## Verify on Stellar Testnet
+
+From the repository root, use the PowerShell terminal where `stellar keys ls` shows the authorized alias. Build the Wasm first with the native instructions above; Docker is not required.
+
+```powershell
+npm.cmd run verify:testnet -- deployer2
+```
+
+This mutates **SDF Stellar Testnet only**. It resolves the existing CLI identity before contacting Testnet, checks the official Testnet RPC's passphrase, and uses Friendbot only if the account is missing. It uploads the compiled Wasm, deploys the contract with that account as publisher, anchors one synthetic random commitment, and confirms that the contract reports the commitment. Only the CLI signs; the script never prints or exports a seed and never reads application records.
+
+On success the command prints a verified result with contract ID and transaction hashes. It also keeps a nonsecret journal at `.pilot-data/genomap-testnet-verification.json`. If the run stops after creating this journal, inspect the hashes on Testnet before doing anything else. The script will not repeat a submission or create a second deployment while the journal exists.
+
+To use that contract in the application, follow the same normal terminal session:
+
+```powershell
+$env:GENOMAP_STELLAR_NETWORK = 'testnet'
+$env:GENOMAP_STELLAR_ISSUER_ALIAS = 'deployer2'
+$env:GENOMAP_STELLAR_CONTRACT_ID = '<verified contractId>'
+npm.cmd run build
+npm.cmd start
+```
+
+Leave `GENOMAP_STELLAR_ISSUER_SECRET` unset. Leave `GENOMAP_STELLAR_RPC_URL` unset to select SDF's official HTTPS endpoint; no alternatives or redirects are accepted in this mode. Leave `GENOMAP_DB_PATH` unset: Testnet uses `.pilot-data/genomap-testnet.sqlite`, separate from the standalone database. Bootstrap a separate moderator and use fictional data in this database. Testnet has no production permanence and [resets periodically](https://developers.stellar.org/docs/networks#testnet-and-futurenet-data-reset); do not rely on these proofs for real attendance.
+
 ## Pilot limits
 
-No browser camera scanner, account recovery flow, address-ownership verification, hosted chain, or deployment is included. Share URLs are accessible only where the local server is reachable. Do not use pilot credentials or publisher keys on any other environment.
+No browser camera scanner, account recovery flow, address-ownership verification, Mainnet, or app hosting is included. Share URLs are accessible only where the local server is reachable. Do not use pilot credentials or publisher keys on any other environment.
