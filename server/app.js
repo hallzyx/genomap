@@ -165,8 +165,8 @@ export async function createPilot({ databasePath, origin, authSecret, chain = nu
   });
   app.use("/assets", express.static(join(root, "assets"), { index: false, redirect: false }));
   app.use("/pilot-assets", express.static(join(root, "dist"), { index: false, redirect: false }));
-  app.get(["/", "/index.html"], send("index.html"));
-  app.get(["/en", "/en/index.html"], send("en/index.html"));
+  app.get(["/", "/index.html"], send("dist/landing/index.html"));
+  app.get(["/en", "/en/", "/en/index.html"], send("dist/landing/en/index.html"));
   app.get("/styles.css", send("styles.css"));
   app.get("/app.css", send("app.css"));
   app.get(["/app", "/app/index.html", "/en/app", "/en/app/index.html"], send("dist/index.html"));

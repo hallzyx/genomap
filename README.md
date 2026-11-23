@@ -13,7 +13,7 @@ npm.cmd run build
 npm.cmd start
 ```
 
-Open [the local landing page](http://127.0.0.1:4173/) and choose **Acceder**, or open the [English app](http://127.0.0.1:4173/en/app/index.html). Use the server URLs, not a `file://` URL: the repository’s original static app files are only previews. The server delivers the React build and API on one origin.
+Open [the Spanish landing page](http://127.0.0.1:4173/) or [the English landing page](http://127.0.0.1:4173/en/) and enter the pilot. The landing and pilot are React pages in the same Vite build, served by Express on the same origin as the API. Use the server URLs, not a `file://` URL: the original files under `app/` and `en/app/` are design previews only.
 
 - The default database is `.pilot-data/genomap.sqlite`. Set `GENOMAP_DB_PATH` to use a different file.
 - The server binds only to `127.0.0.1`. Set `GENOMAP_PORT` to change port, then use that port in the URL.
