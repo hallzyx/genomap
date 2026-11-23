@@ -2,7 +2,7 @@
 .pilot-main:focus { outline-offset: 8px; }
 .pilot-main button, .pilot-main input, .pilot-main select { font: inherit; }
 .pilot-main button { cursor: pointer; }
-.pilot-main button:disabled { cursor: wait; opacity: .62; }
+.pilot-main button:is(:disabled, [aria-disabled="true"]) { cursor: wait; opacity: .62; }
 .pilot-access-rail { position: relative; overflow: hidden; min-height: 23rem; isolation: isolate; }
 .pilot-access-rail img {
   position: absolute;
@@ -61,18 +61,20 @@
   color: var(--ink);
   font-weight: 700 !important;
 }
-.pilot-button:not(:disabled):hover { background: #e8ff9a; }
+.pilot-button:not(:disabled, [aria-disabled="true"]):hover { background: #e8ff9a; }
 .pilot-button.secondary { background: var(--white); }
 .pilot-button.secondary:not(:disabled):hover { background: #e8efce; }
 .pilot-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .8rem; }
-.pilot-feedback:empty { display: none; }
-.pilot-feedback { display: grid; gap: .4rem; margin-bottom: 1rem; }
+.pilot-feedback { display: grid; gap: .4rem; }
+.pilot-feedback:not(:empty) { margin-block: .7rem 1rem; }
 .pilot-feedback p, .pilot-message {
   padding: .65rem .95rem;
   border-left: 3px solid #7162aa;
   background: var(--white);
 }
 .pilot-feedback .pilot-alert { border-color: #a3474d; color: #8d2835; }
+.pilot-list .pilot-feedback { flex-basis: 100%; }
+.pilot-list .pilot-feedback:empty { position: absolute; }
 .pilot-heading {
   display: flex;
   align-items: end;

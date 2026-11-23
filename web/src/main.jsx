@@ -4,7 +4,7 @@ import "../../styles.css";
 import "../../app.css";
 import "./pilot.css";
 import { appPath, english, language, sitePath, t } from "./copy.js";
-import { Access, Account, Moderation, OrganizerPanels, OrganizerRequest, Records, Section } from "./panels.jsx";
+import { Access, Account, Feedback, Moderation, OrganizerPanels, OrganizerRequest, Records, Section } from "./panels.jsx";
 
 const query = new URLSearchParams(location.search);
 const publicToken = query.get("proof");
@@ -16,8 +16,8 @@ async function request(path, { body, signal } = {}) {
     ...(body === undefined ? {} : {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
     }),
-  });
-  const payload = await response.json();
+  }).catch(() => { throw new Error(t.errors.fallback); });
+  const payload = await response.json().catch(() => { throw new Error(t.errors.fallback); });
   if (response.ok) return payload;
   const code = payload.error?.code ?? payload.code;
   throw Object.assign(new Error(t.errors[String(code).toLowerCase()] ?? t.errors.fallback), {
@@ -60,8 +60,9 @@ function Header() {
   </>;
 }
 
-function Workspace({ data, busy, run, refresh }) {
-  const { user, profile, chainEnabled, credentials, events, requests } = data;
+function Workspace({ data, actions }) {
+  const { user, profile, chainEnabled, chainNetwork, credentials, events, requests } = data;
+  const networkLabel = chainEnabled ? (chainNetwork === "testnet" ? t.testnet : t.live) : t.offline;
   const { role } = profile;
   const organizer = role === "organizer";
   const moderator = role === "moderator";
@@ -72,28 +73,34 @@ function Workspace({ data, busy, run, refresh }) {
       <div>
         <p className="eyebrow">{t.workspace} <span aria-hidden="true">/</span> {t.role[role]}</p>
         <h1>{t.hello} {user.name}</h1>
-        <p className="pilot-network"><span className="signal-dot" aria-hidden="true" />{chainEnabled ? t.live : t.offline}</p>
+        <p className="pilot-network"><span className="signal-dot" aria-hidden="true" />{networkLabel}</p>
       </div>
       <div className="pilot-actions">
-        <button type="button" className="pilot-button secondary" disabled={busy} onClick={refresh}>{t.refresh}</button>
-        <button type="button" className="pilot-button secondary" disabled={busy}
-          onClick={() => run("/api/auth/sign-out")}>{t.signOut}</button>
+        <button type="button" className="pilot-button secondary" disabled={actions.busy}
+          onClick={() => actions.run({ scope: "session", notice: t.refreshed })}>
+          {actions.active === "session" ? t.working : t.refresh}
+        </button>
+        <button type="button" className="pilot-button secondary" disabled={actions.busy}
+          onClick={() => actions.run({ scope: "sign-out", path: "/api/auth/sign-out" })}>
+          {actions.active === "sign-out" ? t.working : t.signOut}
+        </button>
       </div>
     </div>
-    {moderator ? <Moderation requests={requests} busy={busy} run={run} /> : (
+    <Feedback feedback={actions.feedback} scope={["session", "sign-out"]} />
+    {moderator ? <Moderation requests={requests} actions={actions} /> : (
       <div className="pilot-grid">
         <div className="pilot-column">
           {organizer ? <>
-            <OrganizerPanels events={events} busy={busy} run={run} />
+            <OrganizerPanels events={events} actions={actions} />
             <Section title={t.issued}>
-              <Records records={issued} empty={t.noIssued} busy={busy} run={run} chainEnabled={chainEnabled} />
+              <Records records={issued} empty={t.noIssued} actions={actions} chainEnabled={chainEnabled} />
             </Section>
           </> : null}
           <Section title={t.records}><Records records={personal} empty={t.noRecords} /></Section>
         </div>
         <aside className="pilot-column" aria-label={t.account}>
-          <Account profile={profile} busy={busy} run={run} />
-          {!organizer ? <OrganizerRequest status={profile.organizerStatus} busy={busy} run={run} /> : null}
+          <Account profile={profile} actions={actions} />
+          {!organizer ? <OrganizerRequest status={profile.organizerStatus} actions={actions} /> : null}
         </aside>
       </div>
     )}
@@ -102,16 +109,20 @@ function Workspace({ data, busy, run, refresh }) {
 
 function PublicProfile() {
   const [state, setState] = useState({ result: null, error: validToken ? null : t.noPublic });
+  const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     if (!validToken) return;
     const controller = new AbortController();
     request(`/api/public/${encodeURIComponent(publicToken)}`, { signal: controller.signal })
       .then((result) => setState({ result, error: null }))
       .catch((error) => {
-        if (!controller.signal.aborted) setState({ result: null, error: error.status === 404 ? t.noPublic : error.message });
+        if (!controller.signal.aborted) {
+          const missing = error.status === 404;
+          setState({ result: null, error: missing ? t.noPublic : error.message, retryable: !missing });
+        }
       });
     return () => controller.abort();
-  }, []);
+  }, [attempt]);
   return <section className="pilot-public">
     <p className="eyebrow">{t.publicProfile}</p>
     <h1>{state.result?.name ?? t.publicProfile}</h1>
@@ -119,14 +130,20 @@ function PublicProfile() {
       <p>{t.publicIntro}</p>
       <Records records={state.result.credentials} empty={t.noPublicRecords} />
     </> : <p role={state.error ? "alert" : "status"}>{state.error ?? t.loading}</p>}
+    {state.retryable ? <div className="pilot-actions">
+      <button type="button" className="pilot-button secondary" onClick={() => {
+        setState({ result: null, error: null });
+        setAttempt((value) => value + 1);
+      }}>{t.retry}</button>
+    </div> : null}
     <a className="text-link" href={appPath}>{t.access} <span aria-hidden="true">↗</span></a>
   </section>;
 }
 
 function AccountApp() {
   const [view, setView] = useState({ loading: true, data: null });
-  const [feedback, setFeedback] = useState({});
-  const [busy, setBusy] = useState(false);
+  const [feedback, setFeedback] = useState(null);
+  const [active, setActive] = useState(null);
   const inFlight = useRef(false);
   const focusAfterAuth = useRef(false);
 
@@ -137,7 +154,7 @@ function AccountApp() {
       .catch((error) => {
         if (!controller.signal.aborted) {
           setView({ loading: false, data: null, failed: true });
-          setFeedback({ error: error.message });
+          setFeedback({ scope: "session", error: error.message });
         }
       });
     return () => controller.abort();
@@ -149,11 +166,11 @@ function AccountApp() {
     document.querySelector("#content").focus();
   }, [view]);
 
-  async function run(path, body = {}, form) {
+  async function run({ scope, path, body = {}, form, notice, feedbackScope = scope }) {
     if (inFlight.current) return;
     inFlight.current = true;
-    setBusy(true);
-    setFeedback({});
+    setActive(scope);
+    setFeedback(null);
     let saved = false;
     const authAction = path?.startsWith("/api/auth/");
     try {
@@ -165,32 +182,40 @@ function AccountApp() {
       const data = await readWorkspace();
       focusAfterAuth.current = authAction;
       setView({ loading: false, data });
-      if (!authAction) setFeedback({ notice: saved ? t.updated : t.refreshed });
+      if (notice) setFeedback({ scope: feedbackScope, notice });
     } catch (error) {
       if (error.status === 401 && !authAction) {
+        focusAfterAuth.current = true;
         setView({ loading: false, data: null });
+        setFeedback({ scope: "session", error: t.errors.sign_in_required });
       } else if (saved && authAction) {
         setView({ loading: false, data: null, failed: true });
+        setFeedback({ scope: "session", error: t.reloadFailed });
+      } else {
+        setFeedback({
+          scope: saved ? feedbackScope : scope,
+          notice: saved ? notice : undefined,
+          error: saved ? t.reloadFailed : error.message,
+        });
       }
-      setFeedback({ error: error.message, notice: saved && !authAction ? t.updated : undefined });
     } finally {
       inFlight.current = false;
-      setBusy(false);
+      setActive(null);
     }
   }
 
+  const actions = { busy: active !== null, active, feedback, run, clearFeedback: () => setFeedback(null) };
   return <>
-    <div className="pilot-feedback" aria-live="polite">
-      {feedback.notice ? <p>{feedback.notice}</p> : null}
-      {feedback.error ? <p className="pilot-alert" role="alert">{feedback.error}</p> : null}
-    </div>
     {view.loading ? <p className="pilot-message" role="status">{t.loading}</p> : view.failed ? (
-      <button className="pilot-button" type="button" disabled={busy} onClick={() => run()}>
-        {busy ? t.working : t.retry}
-      </button>
+      <>
+        <Feedback feedback={feedback} scope="session" />
+        <button className="pilot-button" type="button" disabled={actions.busy} onClick={() => run({ scope: "session" })}>
+          {actions.busy ? t.working : t.retry}
+        </button>
+      </>
     ) : view.data ? (
-      <Workspace data={view.data} busy={busy} run={run} refresh={() => run()} />
-    ) : <Access busy={busy} run={run} />}
+      <Workspace data={view.data} actions={actions} />
+    ) : <Access actions={actions} />}
   </>;
 }
 
