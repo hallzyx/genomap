@@ -6,12 +6,12 @@ Every screenshot below was taken from the real app (not mockups), driven end to 
 
 **The idea in one line:** builders in the Stellar ecosystem get a trail of verified marks (attended, won, staff, speaker). An approved organizer signs each mark, Genomap stores it, and it is written on Stellar against the builder's wallet. Anyone can validate a trail in seconds.
 
-| Role | What they do |
-| --- | --- |
-| **Builder** | Collects marks. Links one Stellar wallet, permanently. |
-| **Organizer** | Signs marks for the events they run. Approved by hand by a moderator. |
-| **Moderator** | Reviews and approves organizers. |
-| **Recruiter / agent** | Validates a trail from the browser or the JSON API. No account needed. |
+| Role | What they do | Where they work |
+| --- | --- | --- |
+| **Builder** | Collects marks. Links one Stellar wallet, permanently. | *My trail · My code · Account* |
+| **Organizer** | Signs marks for the events they run. Approved by hand by a moderator. | *Check-in · Events · My trail · Account* |
+| **Moderator** | Reviews and approves organizers. | *Requests* |
+| **Recruiter / agent** | Validates a trail from the browser, the JSON API or MCP. No account needed. | *Validate* |
 
 Contents: [1. Landing](#1-the-story-landing) · [2. Builder joins](#2-a-builder-joins-and-links-a-wallet) · [3. Organizer approved](#3-an-organizer-asks-a-moderator-approves) · [4. Organizer signs marks](#4-the-organizer-signs-marks-and-they-land-on-stellar) · [5. Builder verifies](#5-the-builder-sees-the-trail-and-checks-it-against-stellar) · [6. Recruiter validates](#6-a-recruiter-validates-no-account-needed) · [7. Variants](#7-dark-mode-spanish-and-mobile)
 
@@ -33,7 +33,7 @@ Scrolling down explains how it works, who it is for, and the four trust states a
 
 ![Join](docs/walkthrough/03-join.png)
 
-**Step 2 – Pick a public name.** This is how recruiters find the builder. It is chosen once.
+**Step 2 – Pick a public name.** This is how recruiters find the builder. It is chosen once. Setup is shown one step at a time, with a progress indicator.
 
 ![Username](docs/walkthrough/04-username.png)
 
@@ -45,103 +45,119 @@ For wallets other than Freighter there is a manual route: paste the address, sig
 
 ![Sign the proof message](docs/walkthrough/06-wallet-sign-message.png)
 
-**Step 4 – Linked.** The dashboard now shows the permanent anchor wallet, the builder's check-in code (as text and QR) to show organizers at events, and the privacy and verification controls.
+**Step 4 – Ready.** Setup is done and the dashboard becomes the builder's trail, empty until the first event.
 
-![Builder dashboard with linked wallet](docs/walkthrough/07-builder-linked.png)
+![Empty trail](docs/walkthrough/07-builder-trail-empty.png)
+
+**My code.** The check-in code (text and QR) is what the builder shows at an event. It has its own tab so it is one tap away.
+
+![My code](docs/walkthrough/08-builder-code.png)
+
+**Account.** Identity and public link, the permanent anchor wallet, the public-profile switch, and the way to ask to become an organizer.
+
+![Account](docs/walkthrough/09-builder-account.png)
 
 ## 3. An organizer asks, a moderator approves
 
-Organizers cannot approve themselves. They send a short request. The moderator reviews it by hand, outside the app, and writes back by email.
+Organizers cannot approve themselves. They send a short request from their account. The moderator reviews it by hand, outside the app, and writes back by email.
 
-![Organizer request form](docs/walkthrough/08-organizer-request.png)
+![Organizer request form](docs/walkthrough/10-organizer-request.png)
 
-While the request is under review the organizer sees a pending state.
+While the request is under review the organizer sees an *In review* state.
 
-![Request sent](docs/walkthrough/09-organizer-request-sent.png)
+![Request sent](docs/walkthrough/11-organizer-request-sent.png)
 
 The moderator sees a queue with who asked, their email, link and note.
 
-![Moderator queue](docs/walkthrough/10-moderator-queue.png)
+![Moderator queue](docs/walkthrough/12-moderator-queue.png)
 
 Approval is deliberate: the button stays disabled until the moderator confirms they verified the organizer outside the app.
 
-![Moderator confirms verification](docs/walkthrough/11-moderator-verified-checked.png)
+![Moderator confirms verification](docs/walkthrough/13-moderator-verified-checked.png)
 
-![Queue cleared](docs/walkthrough/12-moderator-done.png)
+![Queue cleared](docs/walkthrough/14-moderator-done.png)
 
 ## 4. The organizer signs marks, and they land on Stellar
 
-The approved organizer gets an events workspace.
+Once approved, the organizer gets a workspace with tabs. With no events yet, the first screen points to what to do next.
 
-![Organizer workspace](docs/walkthrough/13-organizer-empty.png)
+![Check-in with no events](docs/walkthrough/15-organizer-no-events.png)
 
-At the event, they type (or paste) the builder's check-in code and choose what the builder did: attended, won, staff or speaker.
+Events live on their own tab: totals, the list, and a small form to create one.
 
-![Sign a mark](docs/walkthrough/14-organizer-sign-mark.png)
+![Events](docs/walkthrough/16-organizer-events-empty.png)
 
-The mark is signed immediately and Genomap starts writing it to Stellar. While the network confirms, the mark shows an animated *Anchoring…* state and a note that the record is already safe.
+Creating an event opens it in **Check-in**, which has one job: pick the event, type (or paste) the builder's check-in code, choose what the builder did (attended, won, staff or speaker) and sign.
 
-![Anchoring](docs/walkthrough/15-organizer-anchoring.png)
+![Check-in](docs/walkthrough/17-organizer-check-in.png)
+
+The mark is signed immediately and Genomap starts writing it to Stellar. While the network confirms, the mark shows an animated *Anchoring…* state, and the confirmation sits inside the form so nothing is covered.
+
+![Anchoring](docs/walkthrough/18-organizer-anchoring.png)
 
 A few seconds later it flips to **On-chain**, with a link to the transaction on Stellar.
 
-![Anchored on-chain](docs/walkthrough/16-organizer-anchored.png)
+![Anchored on-chain](docs/walkthrough/19-organizer-anchored.png)
+
+After a second event and mark, the Events tab shows the totals: 2 signed, 2 on-chain, 0 waiting.
+
+![Events with totals](docs/walkthrough/20-organizer-events.png)
 
 ## 5. The builder sees the trail and checks it against Stellar
 
-The builder's trail now shows both marks as **On-chain**, each with its transaction link.
+The builder's trail shows both marks as **On-chain**, each with its transaction link. The two strands of the trail cross on every mark.
 
-![Builder trail](docs/walkthrough/17-builder-trail.png)
+![Builder trail](docs/walkthrough/21-builder-trail.png)
 
 **Check against Stellar** compares what Genomap shows with what the network holds for the builder's wallet, row by row. If any mark did not match, it would be flagged and the network would win.
 
-![Builder verification](docs/walkthrough/18-builder-verify-match.png)
+![Builder verification](docs/walkthrough/22-builder-verify-match.png)
 
-Profiles are private by default. One switch makes the trail findable by username or wallet.
+Profiles are private by default. One switch in Account makes the trail findable by username or wallet.
 
-![Public profile switch](docs/walkthrough/19-builder-public-on.png)
+![Public profile switch](docs/walkthrough/23-builder-public-on.png)
 
 ## 6. A recruiter validates (no account needed)
 
 The validator takes a username or a wallet address (it starts with G).
 
-![Validator](docs/walkthrough/20-validator.png)
+![Validator](docs/walkthrough/24-validator.png)
 
 The result reads in plain words ("Won 1 hackathon · last month"), shows the permanently linked wallet and the full trail of signed marks.
 
-![Public profile](docs/walkthrough/21-profile.png)
+![Public profile](docs/walkthrough/25-profile.png)
 
 One click re-checks the whole trail against the Stellar network. The recruiter does not have to trust Genomap.
 
-![Recruiter verification](docs/walkthrough/22-profile-verified.png)
+![Recruiter verification](docs/walkthrough/26-profile-verified.png)
 
 If nobody matches, the message says what to try next.
 
-![Not found](docs/walkthrough/23-validator-not-found.png)
+![Not found](docs/walkthrough/27-validator-not-found.png)
 
-Agents and bulk users get the same data as plain JSON.
+Agents and bulk users get the same data as plain JSON, and a read-only **MCP server** lets an AI agent validate builders directly (`validate_builder` and `verify_builder`).
 
-![API page](docs/walkthrough/24-api-page.png)
+![API and MCP page](docs/walkthrough/28-api-page.png)
 
 Technical words are explained in human language in a glossary, and as tooltips throughout the app.
 
-![Glossary](docs/walkthrough/25-glossary.png)
+![Glossary](docs/walkthrough/29-glossary.png)
 
 ## 7. Dark mode, Spanish and mobile
 
 Dark theme ("Night survey"):
 
-![Profile in dark mode](docs/walkthrough/26-profile-dark.png)
+![Profile in dark mode](docs/walkthrough/30-profile-dark.png)
 
 Spanish, picked automatically from a Spanish browser:
 
-![Landing in Spanish](docs/walkthrough/27-landing-es.png)
+![Landing in Spanish](docs/walkthrough/31-landing-es.png)
 
-Mobile profile and landing:
+On phones, the navigation folds into a menu so every page stays reachable:
 
-| Profile | Landing |
-| --- | --- |
-| ![Mobile profile](docs/walkthrough/28-profile-mobile.png) | ![Mobile landing](docs/walkthrough/29-landing-mobile.png) |
+| Landing | Menu | Profile | Organizer check-in |
+| --- | --- | --- | --- |
+| ![Mobile landing](docs/walkthrough/32-landing-mobile.png) | ![Mobile menu](docs/walkthrough/33-menu-mobile.png) | ![Mobile profile](docs/walkthrough/34-profile-mobile.png) | ![Mobile organizer](docs/walkthrough/35-organizer-mobile.png) |
 
 ---
 
