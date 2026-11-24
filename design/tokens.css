@@ -1,0 +1,215 @@
+/* ==========================================================================
+   Genomap — design tokens
+   "Field paper" (light) and "Night survey" (dark).
+   Theme resolution:
+     1. :root                      -> light (default)
+     2. prefers-color-scheme: dark -> dark, unless <html data-theme="light">
+     3. [data-theme="dark"]        -> dark, always
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Martian+Mono:wght@400;500;600&display=swap');
+
+:root {
+  color-scheme: light;
+
+  /* ---- Raw brand palette (theme-independent references) ---------------- */
+  --gm-ink-900: #14121F;      /* Survey Ink */
+  --gm-paper-100: #F5F0E6;    /* Field Paper */
+  --gm-blaze-500: #FF6A2B;    /* Trail Blaze */
+  --gm-blaze-400: #FF7A3D;
+  --gm-night-900: #0F0E17;    /* Night Survey */
+
+  /* ---- Surfaces --------------------------------------------------------- */
+  --bg: #F5F0E6;              /* page: field paper */
+  --surface: #FFFDF8;         /* cards, sheets */
+  --surface-2: #EDE6D8;       /* sunken wells, inputs on cards */
+  --surface-inverse: #14121F;
+  --line: #DCD3C2;            /* hairlines */
+  --line-strong: #8A7E69;           /* input borders (>=3:1 on surface) */
+  --contour: rgba(20, 18, 31, .075); /* topographic texture strokes */
+  --scrim: rgba(20, 18, 31, .55);
+
+  /* ---- Text ------------------------------------------------------------- */
+  --text: #14121F;
+  --text-2: #46424F;
+  --text-3: #6A6575;          /* muted, still AA on bg */
+  --text-inverse: #F5F0E6;
+
+  /* ---- Brand ------------------------------------------------------------ */
+  --blaze: #FF6A2B;           /* fills, the trail, primary button bg */
+  --blaze-ink: #AE3A0A;       /* blaze as text/links on paper (AA) */
+  --blaze-soft: #FFE2D3;
+  --on-blaze: #14121F;        /* text on blaze fills */
+  --edge: #14121F;            /* stamp edge of primary buttons */
+  --strand: #14121F;          /* second helix strand */
+  --focus: #2F5BFF;
+
+  /* ---- Trust states (each has fill / ink / soft) ------------------------
+     signed   = issued by a verified organizer, stored in Genomap
+     anchored = written on the Stellar network (Soroban), the strongest proof
+     weaving  = pending: waiting to be anchored
+     snag     = failed: anchoring or verification did not go through        */
+  --signed: #2F5BFF;   --signed-ink: #1F43CC;   --signed-soft: #E3E8FF;
+  --anchored: #0E9F6E; --anchored-ink: #08694A; --anchored-soft: #D6F3E7;
+  --weaving: #7C4DFF;  --weaving-ink: #5A2FD6;  --weaving-soft: #ECE5FF;
+  --snag: #E0244F;     --snag-ink: #B0163B;     --snag-soft: #FDE2E8;
+
+  /* ---- Typography ------------------------------------------------------- */
+  --font-display: 'Bricolage Grotesque', 'Instrument Sans', system-ui, sans-serif;
+  --font-body: 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Martian Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+
+  /* mobile-first fluid scale (≈1.25 on mobile -> ≈1.333 on desktop) */
+  --fs-micro: .6875rem;                                  /* 11px mono labels */
+  --fs-xs: .8125rem;                                     /* 13 */
+  --fs-sm: .9375rem;                                     /* 15 */
+  --fs-base: 1rem;                                       /* 16 */
+  --fs-md: 1.125rem;                                     /* 18 */
+  --fs-lg: clamp(1.25rem, 1.1rem + .6vw, 1.5rem);        /* 20 -> 24 */
+  --fs-xl: clamp(1.5rem, 1.25rem + 1.1vw, 2rem);         /* 24 -> 32 */
+  --fs-2xl: clamp(1.875rem, 1.4rem + 2vw, 2.875rem);     /* 30 -> 46 */
+  --fs-3xl: clamp(2.375rem, 1.6rem + 3.6vw, 4.25rem);    /* 38 -> 68 */
+  --fs-display: clamp(2.875rem, 1.7rem + 5.6vw, 6.25rem);/* 46 -> 100 */
+
+  --lh-tight: 1;
+  --lh-snug: 1.15;
+  --lh-body: 1.55;
+  --tracking-display: -.035em;
+  --tracking-label: .08em;
+
+  /* ---- Spacing (4px base) ----------------------------------------------- */
+  --sp-1: .25rem;  --sp-2: .5rem;   --sp-3: .75rem;  --sp-4: 1rem;
+  --sp-5: 1.25rem; --sp-6: 1.5rem;  --sp-8: 2rem;    --sp-10: 2.5rem;
+  --sp-12: 3rem;   --sp-16: 4rem;   --sp-20: 5rem;   --sp-24: 6rem;
+  --gutter: 1rem;                       /* 16px mobile side gutter */
+  --container: 72rem;
+
+  /* ---- Radii ------------------------------------------------------------ */
+  --r-xs: 6px;
+  --r-sm: 10px;
+  --r-md: 14px;      /* buttons, inputs */
+  --r-lg: 22px;      /* cards */
+  --r-xl: 32px;      /* sheets, ceremony */
+  --r-pill: 999px;
+
+  /* ---- Elevation: warm, ink-tinted. "stamp" = hard offset like a rubber stamp */
+  --shadow-1: 0 1px 0 rgba(20,18,31,.06), 0 1px 3px rgba(20,18,31,.08);
+  --shadow-2: 0 2px 4px rgba(20,18,31,.06), 0 10px 24px -8px rgba(20,18,31,.18);
+  --shadow-3: 0 4px 8px rgba(20,18,31,.06), 0 28px 56px -20px rgba(20,18,31,.35);
+  --shadow-stamp: 0 3px 0 0 var(--text);
+  --glow-blaze: 0 0 0 6px rgba(255,106,43,.18), 0 0 28px 4px rgba(255,106,43,.35);
+  --glow-anchored: 0 0 0 6px rgba(14,159,110,.16), 0 0 24px 2px rgba(14,159,110,.3);
+
+  /* ---- Strokes (the trail) ---------------------------------------------- */
+  --stroke-trail: 4px;
+  --stroke-strand: 2.5px;
+  --node-size: 18px;
+
+  /* ---- Motion ----------------------------------------------------------- */
+  --ease-weave: cubic-bezier(.65, 0, .35, 1);     /* strands crossing */
+  --ease-out: cubic-bezier(.16, 1, .3, 1);        /* arrivals */
+  --ease-in: cubic-bezier(.7, 0, .84, 0);         /* exits */
+  --ease-spring: cubic-bezier(.34, 1.56, .64, 1); /* node pop, small things only */
+  --dur-1: 120ms;  /* hover, press */
+  --dur-2: 220ms;  /* toggles, pills */
+  --dur-3: 380ms;  /* cards, sheets */
+  --dur-4: 700ms;  /* node lights up */
+  --dur-5: 1400ms; /* ceremony beats */
+  --dur-draw: 3200ms; /* hero trail draw */
+
+  --z-sticky: 10; --z-toast: 50; --z-modal: 60;
+}
+
+/* ---- Dark: "Night survey" ------------------------------------------------ */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0F0E17;
+    --surface: #1A1826;
+    --surface-2: #0A0911;
+    --surface-inverse: #F5F0E6;
+    --line: #2D2A3B;
+    --line-strong: #6A6480;
+    --contour: rgba(245, 240, 230, .06);
+    --scrim: rgba(5, 4, 10, .7);
+    --text: #F5F0E6;
+    --text-2: #CBC5D6;
+    --text-3: #9C96AC;
+    --text-inverse: #14121F;
+    --blaze: #FF7A3D;
+    --blaze-ink: #FF9A6A;
+    --blaze-soft: rgba(255, 122, 61, .14);
+    --on-blaze: #14121F;
+    --edge: #F5F0E6;
+    --strand: #F5F0E6;
+    --focus: #8FA6FF;
+    --signed: #7D98FF;   --signed-ink: #A3B6FF;   --signed-soft: rgba(125,152,255,.14);
+    --anchored: #2FD49A; --anchored-ink: #62E2B4; --anchored-soft: rgba(47,212,154,.13);
+    --weaving: #A88BFF;  --weaving-ink: #BFA8FF;  --weaving-soft: rgba(168,139,255,.14);
+    --snag: #FF5C7F;     --snag-ink: #FF8BA3;     --snag-soft: rgba(255,92,127,.14);
+    --shadow-1: 0 1px 0 rgba(0,0,0,.4);
+    --shadow-2: 0 10px 24px -8px rgba(0,0,0,.6);
+    --shadow-3: 0 28px 56px -20px rgba(0,0,0,.8);
+    --glow-blaze: 0 0 0 6px rgba(255,122,61,.18), 0 0 32px 6px rgba(255,122,61,.4);
+    --glow-anchored: 0 0 0 6px rgba(47,212,154,.15), 0 0 28px 4px rgba(47,212,154,.35);
+  }
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0F0E17;
+  --surface: #1A1826;
+  --surface-2: #0A0911;
+  --surface-inverse: #F5F0E6;
+  --line: #2D2A3B;
+  --line-strong: #6A6480;
+  --contour: rgba(245, 240, 230, .06);
+  --scrim: rgba(5, 4, 10, .7);
+  --text: #F5F0E6;
+  --text-2: #CBC5D6;
+  --text-3: #9C96AC;
+  --text-inverse: #14121F;
+  --blaze: #FF7A3D;
+  --blaze-ink: #FF9A6A;
+  --blaze-soft: rgba(255, 122, 61, .14);
+  --on-blaze: #14121F;
+  --edge: #F5F0E6;
+  --strand: #F5F0E6;
+  --focus: #8FA6FF;
+  --signed: #7D98FF;   --signed-ink: #A3B6FF;   --signed-soft: rgba(125,152,255,.14);
+  --anchored: #2FD49A; --anchored-ink: #62E2B4; --anchored-soft: rgba(47,212,154,.13);
+  --weaving: #A88BFF;  --weaving-ink: #BFA8FF;  --weaving-soft: rgba(168,139,255,.14);
+  --snag: #FF5C7F;     --snag-ink: #FF8BA3;     --snag-soft: rgba(255,92,127,.14);
+  --shadow-1: 0 1px 0 rgba(0,0,0,.4);
+  --shadow-2: 0 10px 24px -8px rgba(0,0,0,.6);
+  --shadow-3: 0 28px 56px -20px rgba(0,0,0,.8);
+  --glow-blaze: 0 0 0 6px rgba(255,122,61,.18), 0 0 32px 6px rgba(255,122,61,.4);
+  --glow-anchored: 0 0 0 6px rgba(47,212,154,.15), 0 0 28px 4px rgba(47,212,154,.35);
+}
+
+/* Light island: forces field-paper values on any element (e.g. a light card inside a dark page) */
+:root[data-theme="light"], [data-theme="light"] {
+  color-scheme: light;
+  --bg: #F5F0E6; --surface: #FFFDF8; --surface-2: #EDE6D8; --surface-inverse: #14121F;
+  --line: #DCD3C2; --line-strong: #8A7E69; --contour: rgba(20, 18, 31, .075); --scrim: rgba(20, 18, 31, .55);
+  --text: #14121F; --text-2: #46424F; --text-3: #6A6575; --text-inverse: #F5F0E6;
+  --blaze: #FF6A2B; --blaze-ink: #AE3A0A; --blaze-soft: #FFE2D3; --on-blaze: #14121F; --edge: #14121F; --strand: #14121F; --focus: #2F5BFF;
+  --signed: #2F5BFF;   --signed-ink: #1F43CC;   --signed-soft: #E3E8FF;
+  --anchored: #0E9F6E; --anchored-ink: #08694A; --anchored-soft: #D6F3E7;
+  --weaving: #7C4DFF;  --weaving-ink: #5A2FD6;  --weaving-soft: #ECE5FF;
+  --snag: #E0244F;     --snag-ink: #B0163B;     --snag-soft: #FDE2E8;
+  --shadow-1: 0 1px 0 rgba(20,18,31,.06), 0 1px 3px rgba(20,18,31,.08);
+  --shadow-2: 0 2px 4px rgba(20,18,31,.06), 0 10px 24px -8px rgba(20,18,31,.18);
+  --shadow-3: 0 4px 8px rgba(20,18,31,.06), 0 28px 56px -20px rgba(20,18,31,.35);
+  --glow-blaze: 0 0 0 6px rgba(255,106,43,.18), 0 0 28px 4px rgba(255,106,43,.35);
+  --glow-anchored: 0 0 0 6px rgba(14,159,110,.16), 0 0 24px 2px rgba(14,159,110,.3);
+}
+
+@media (min-width: 48rem) { :root { --gutter: 2rem; } }
+@media (min-width: 80rem) { :root { --gutter: 3rem; } }
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-1: 0ms; --dur-2: 0ms; --dur-3: 0ms; --dur-4: 0ms; --dur-5: 0ms; --dur-draw: 0ms;
+  }
+}

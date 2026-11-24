@@ -1,6 +1,15 @@
-# GenoMap local pilot
+# Genomap
 
-GenoMap lets learners collect attendance records, approved organizers issue them, and moderators review organizer requests. Start the pilot without a wallet or a Stellar node. The app uses React, Better Auth, and SQLite; a separate Soroban contract accepts opaque attendance commitments.
+**Your path is your proof.** Genomap gives builders in the Stellar ecosystem a verifiable trail: every event they attend, win, speak at or help run becomes a *mark*, signed by an approved organizer and anchored on Stellar against the builder's wallet. Anyone can validate a trail by username or wallet.
+
+- **Builders** sign up, claim a public username, and link one Stellar wallet. The wallet is permanent: it needs a signed message (SEP-53, for example from Freighter) and can never be changed or removed.
+- **Organizers** ask for access with a form. A moderator reviews them by hand, outside the app, and approves. Approved organizers create events and sign marks by typing a builder's check-in code.
+- **Moderators** approve organizers. Create the first one with `npm run bootstrap:moderator` (below).
+- **Recruiters and agents** use the public validator (`/validate`, `/v/<username-or-wallet>`) or the JSON API.
+
+**New here? See the screenshot tour: [WALKTHROUGH.md](WALKTHROUGH.md).**
+
+The app is React (Vite), Express, Better Auth and SQLite, plus a Soroban contract in `contracts/attendance`. The interface follows the brand system in [`design/DESIGN.md`](design/DESIGN.md) and picks Spanish or English from the browser, with a visible switch.
 
 ## Start locally
 
@@ -16,7 +25,7 @@ npm.cmd start
 
 Keep `.env` private. Both `npm start` and `npm run bootstrap:moderator` load it from the project root. The file is optional, and server environment variables take precedence.
 
-Open [the Spanish landing page](http://127.0.0.1:4173/) or [the English landing page](http://127.0.0.1:4173/en/) and enter the pilot. The landing and pilot are React pages in the same Vite build, served by Express on the same origin as the API. Use the server URLs, not a `file://` URL: the original files under `app/` and `en/app/` are design previews only.
+Open <http://127.0.0.1:4173/>. One single-page app serves every screen from the same origin as the API, so use the server URL, not a `file://` URL. `design/preview.html` is the standalone style guide.
 
 - The default database is `.pilot-data/genomap.sqlite`. Set `GENOMAP_DB_PATH` to use a different file.
 - The server binds to `127.0.0.1` by default. Set `GENOMAP_PORT` to change port, then use that port in the URL.
@@ -37,10 +46,10 @@ Have the proxy preserve the public `Host` header. Do not expose the internal HTT
 
 ## Try the roles
 
-1. Create a learner account. Its workspace shows a private QR and text check-in code. Adding a public Stellar address is optional and does not verify ownership.
-2. Create another account and request organizer access by entering an organization name. A moderator must approve it.
-3. As the approved organizer, create an event, select it, and enter the learner’s code. You can type it or paste the text from an external QR scanner. Duplicate check-ins for the same learner and event are rejected.
-4. Refresh the learner’s workspace. Enable the public link only if you want to share the display name and attendance records. The profile omits the email and Stellar address. Disable sharing to revoke the URL.
+1. Create a builder account. Claim a username, then link a wallet. With Freighter installed, **Connect Freighter** does it in one step; **Use another wallet** lets you paste an address and a signature.
+2. Create another account and ask to become an organizer. A moderator approves it from their queue. The organizer then sees events and the check-in panel after refreshing.
+3. As the organizer, create an event, pick what the builder did (attended, won, staff, speaker) and enter the builder's check-in code (shown on their dashboard as text and QR). Duplicate marks for the same person, event and kind are rejected.
+4. As the builder, turn on the public profile. Anyone can now open `/v/<username>` or `/v/<wallet>`.
 
 ### Create a local moderator
 
@@ -58,7 +67,18 @@ try {
 }
 ```
 
-Sign in with the new account and approve the pending organization. The organizer can then choose **Refresh** to see the approved workspace. Self-registration never grants organizer or moderator permissions.
+Self-registration never grants organizer or moderator permissions.
+
+## Public API
+
+No key is needed for the public lookup. Only profiles whose owners turned on the public profile are found.
+
+| Request | Returns |
+| --- | --- |
+| `GET /api/validate/<username-or-wallet>` | Name, username, wallet, network and the marks (`kind`, `title`, `eventDate`, `organizer`, `status`, `hash`). |
+| `GET /api/validate/<username-or-wallet>/verify` | Compares each mark with what the contract holds for that wallet: `match`, `missing_on_chain` or `local_only`, plus the on-chain records. Needs Stellar anchoring configured. |
+
+`status` is `confirmed` when the mark is anchored on Stellar and `unanchored` when it is signed and stored only in Genomap.
 
 ## Build the contract natively on Windows
 
@@ -72,7 +92,7 @@ stellar --no-cache contract info interface --wasm target/wasm32v1-none/release/g
 cargo test --locked compiled_registry_executes_in_soroban_host -- --ignored
 ```
 
-The last test executes the actual compiled Wasm in the Soroban test host. Building or running this test does **not** deploy a contract to a ledger.
+The last test executes the actual compiled Wasm in the Soroban test host. Building or running this test does **not** deploy a contract to a ledger. See the [contract notes](contracts/attendance/README.md).
 
 ## Optional local Stellar anchoring
 
@@ -81,37 +101,46 @@ Leave the three variables unset to run without a ledger. To anchor records, set 
 | Variable | Value |
 | --- | --- |
 | `GENOMAP_STELLAR_RPC_URL` | An already-running HTTP RPC on `127.0.0.1` using the Stellar standalone network. |
-| `GENOMAP_STELLAR_CONTRACT_ID` | The locally deployed attendance registry contract ID. |
+| `GENOMAP_STELLAR_CONTRACT_ID` | The locally deployed registry contract ID. |
 | `GENOMAP_STELLAR_ISSUER_SECRET` | The secret seed of the configured local publisher, kept in the server process only. |
 
-An approved organizer can anchor an issued record when the adapter is configured. A record is shown as anchored only after the corresponding transaction succeeds; otherwise it remains local and unanchored. The ledger receives a 32-byte commitment, not the learner name, email, wallet address, or account ID. Shared profiles display the payload and commitment, plus the contract ID and transaction hash if anchored. They do not perform an independent live ledger lookup.
+When an organizer signs a mark for a builder who has linked a wallet, the app registers the organizer on the contract once and writes the record to the builder's wallet. A mark shows as anchored only after the transaction succeeds; otherwise it stays signed and unanchored and the organizer can retry. The contract stores the wallet, kind, event title and date, organizer id and a hash of the full off-chain record. Names, emails and bios stay off-chain.
 
-The publisher is the platform’s local account, not a learner or organizer wallet. Anchoring shows the platform recorded an organizer’s attestation; it does not independently establish that a learner attended. See the [contract notes](contracts/attendance/README.md) for storage lifetime considerations.
+The publisher is the platform's account, not a builder or organizer wallet. Anchoring shows the platform recorded an organizer's attestation; it does not independently establish that a builder attended.
 
 ## Verify on Stellar Testnet
 
 From the repository root, use the PowerShell terminal where `stellar keys ls` shows the authorized alias. Build the Wasm first with the native instructions above; Docker is not required.
 
 ```powershell
-npm.cmd run verify:testnet -- deployer2
+npm.cmd run verify:testnet -- zkoster-admin
 ```
 
-This mutates **SDF Stellar Testnet only**. It resolves the existing CLI identity before contacting Testnet, checks the official Testnet RPC's passphrase, and uses Friendbot only if the account is missing. It uploads the compiled Wasm, deploys the contract with that account as publisher, anchors one synthetic random commitment, and confirms that the contract reports the commitment. Only the CLI signs; the script never prints or exports a seed and never reads application records.
+This mutates **SDF Stellar Testnet only**. It resolves the existing CLI identity before contacting Testnet, checks the official Testnet RPC's passphrase, and uses Friendbot only if the account is missing. It uploads the compiled Wasm, deploys the contract with that account as admin, approves a synthetic organizer, writes one synthetic record to a random wallet, and reads it back. Only the CLI signs; the script never prints or exports a seed and never reads application records.
 
-On success the command prints a verified result with contract ID and transaction hashes. It also keeps a nonsecret journal at `.pilot-data/genomap-testnet-verification.json`. If the run stops after creating this journal, inspect the hashes on Testnet before doing anything else. The script will not repeat a submission or create a second deployment while the journal exists.
+On success the command prints a verified result with the contract ID and transaction hashes. It keeps a nonsecret journal at `.pilot-data/genomap-testnet-verification.json`. If the run stops after creating this journal, inspect the hashes on Testnet before doing anything else. The script will not repeat a submission or create a second deployment while the journal exists.
 
-To use an already verified contract, edit these entries in the application's private `.env` and restart it. This does not redeploy the contract:
+To use a verified contract, edit these entries in the application's private `.env` and restart it. This does not redeploy the contract:
 
 ```dotenv
 GENOMAP_STELLAR_NETWORK=testnet
-GENOMAP_STELLAR_ISSUER_ALIAS=deployer2
+GENOMAP_STELLAR_ISSUER_ALIAS=zkoster-admin
 GENOMAP_STELLAR_CONTRACT_ID=<verified contractId>
 ```
 
-The account running GenoMap must have Stellar CLI and the authorized publisher available under the configured alias. An alias in `.env` does not copy the signer from another machine. Do not put a Testnet seed in `.env`.
+### Choose how the server signs on Testnet
 
-Leave `GENOMAP_STELLAR_ISSUER_SECRET` and `GENOMAP_STELLAR_RPC_URL` unset in Testnet mode. The app uses SDF's official HTTPS endpoint and does not accept alternatives or redirects. Leave `GENOMAP_DB_PATH` unset: Testnet uses `.pilot-data/genomap-testnet.sqlite`, separate from the standalone database. Bootstrap a separate moderator and use fictional data in this database. Testnet has no production permanence and [resets periodically](https://developers.stellar.org/docs/networks#testnet-and-futurenet-data-reset); do not rely on these proofs for real attendance.
+Set **exactly one** of these; the server refuses to start with both or neither:
 
-## Pilot limits
+| Where | Setting |
+| --- | --- |
+| Your own computer (Stellar CLI installed) | `GENOMAP_STELLAR_ISSUER_ALIAS=zkoster-admin`. The alias only exists on machines where `stellar keys add` was run, so it does not work on a clean server. |
+| A clean VPS (no CLI) | `GENOMAP_STELLAR_ISSUER_SECRET=S…`, the secret seed of the **Testnet** publisher account, in that server's private `.env`. Never commit it, never reuse a Mainnet key, and rotate it if the file leaks. |
 
-No browser camera scanner, account recovery flow, address-ownership verification, Mainnet, or app hosting is included. Share URLs are accessible only where the local server is reachable. Do not use pilot credentials or publisher keys on any other environment.
+Both sign for the same publisher account, so the deployed contract keeps working. Mainnet is not supported by this mode.
+
+Leave `GENOMAP_STELLAR_RPC_URL` unset in Testnet mode. The app uses SDF's official HTTPS endpoint and does not accept alternatives or redirects. Leave `GENOMAP_DB_PATH` unset: Testnet uses `.pilot-data/genomap-testnet.sqlite`, separate from the standalone database. Bootstrap a separate moderator and use fictional data in this database. Testnet has no production permanence and [resets periodically](https://developers.stellar.org/docs/networks#testnet-and-futurenet-data-reset); redeploy and update the contract ID if it does.
+
+## Known limits
+
+No browser camera scanner for check-in codes (organizers type or paste them), no account recovery flow, no Mainnet, and no app hosting is included. Do not use test credentials or publisher keys on any other environment.

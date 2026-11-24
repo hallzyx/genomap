@@ -1,0 +1,1004 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Genomap Design System</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="components.css">
+<style>
+  /* ---------- Preview-only layout (not part of the system) ---------- */
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body { overflow-x: clip; }
+  .wrap { width: min(100% - 2 * var(--gutter), var(--container)); margin-inline: auto; }
+  .topbar { position: sticky; top: 0; z-index: var(--z-sticky); background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  .topbar .wrap { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); min-height: 64px; }
+  .topbar nav { display: none; gap: var(--sp-5); font-size: var(--fs-sm); }
+  .topbar nav a { color: var(--text-2); text-decoration: none; }
+  .topbar nav a:hover { color: var(--text); }
+  @media (min-width: 64rem) { .topbar nav { display: flex; } }
+  .toggles { display: flex; gap: var(--sp-2); }
+  .toggles .t-label { display: none; }
+  .toggles .icon { width: 16px; height: 16px; }
+  @media (min-width: 30rem) { .toggles .t-label { display: inline; } .toggles .icon { display: none; } }
+  @media (max-width: 29.99rem) { .wm { height: 26px; } .gm-seg button { padding: 0 .6rem; } }
+  .wm { height: 30px; width: auto; display: block; }
+  .wm .i { stroke: var(--strand); } .wm .b { stroke: var(--blaze); } .wm .n { fill: var(--blaze); }
+
+  /* Hero */
+  .hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--line); }
+  .hero__text { position: relative; z-index: 2; padding-block: var(--sp-10) var(--sp-4); display: grid; gap: var(--sp-5); justify-items: start; }
+  .hero__eyebrow { display: inline-flex; gap: .6em; align-items: center; }
+  .hero__eyebrow .gm-node { --node-size: 10px; border-width: 2px; }
+  .hero h1 em { font-style: normal; color: var(--blaze-ink); position: relative; white-space: nowrap; }
+  .hero__ctas { display: flex; flex-wrap: wrap; gap: var(--sp-3); }
+  .hero__map { position: relative; height: 470px; }
+  .hero__map svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .hero__legend { position: relative; z-index: 2; padding: var(--sp-2) var(--gutter) var(--sp-6); display: flex; gap: var(--sp-3); flex-wrap: wrap; align-items: center; }
+  .hero__coord { display: none; position: absolute; z-index: 2; right: var(--gutter); top: var(--sp-3); text-align: right; }
+  @media (min-width: 64rem) {
+    .hero { min-height: 800px; }
+    .hero__text { padding-block: var(--sp-16) var(--sp-8); }
+    .hero__text > * { max-width: 36rem; }
+    .hero__text h1 { max-width: 42rem; }
+    .hero__map { position: absolute; inset: 0; height: auto; }
+    .hero__coord { display: block; }
+    .hero__legend { position: absolute; padding: 0; left: auto; right: var(--gutter); bottom: var(--sp-6); }
+  }
+  .trail-label { font: 500 11px/1 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; fill: var(--text-2); paint-order: stroke; stroke: var(--bg); stroke-width: 5px; stroke-linejoin: round; }
+  .trail-label--name { font: 700 13px/1 var(--font-body); letter-spacing: -.005em; text-transform: none; fill: var(--text); }
+  .hnode { opacity: 0; transform: scale(0); transform-box: fill-box; transform-origin: center; transition: transform var(--dur-4) var(--ease-spring), opacity var(--dur-2); }
+  .hnode.on { opacity: 1; transform: scale(1); }
+  .hlabel { opacity: 0; transition: opacity var(--dur-3) var(--ease-out) .15s; }
+  .hlabel.on { opacity: 1; }
+  .hring { fill: none; stroke: var(--blaze); stroke-width: 2; transform-box: fill-box; transform-origin: center; animation: gm-ripple 2.2s var(--ease-out) infinite; }
+
+  /* Sections */
+  section.block { padding-block: var(--sp-16); border-bottom: 1px solid var(--line); }
+  .sec-head { display: grid; gap: var(--sp-3); margin-bottom: var(--sp-8); max-width: 46rem; }
+  .sec-num { display: flex; align-items: center; gap: var(--sp-3); }
+  .sec-num::after { content: ""; height: 2px; width: 48px; background: var(--blaze); border-radius: 2px; }
+  .grid { display: grid; gap: var(--sp-5); align-items: start; }
+  @media (min-width: 48rem) { .grid--2 { grid-template-columns: 1fr 1fr; } .grid--3 { grid-template-columns: repeat(3, 1fr); } .grid--4 { grid-template-columns: repeat(4, 1fr); } }
+  .row { display: flex; flex-wrap: wrap; gap: var(--sp-3); align-items: center; }
+  .stack { display: grid; gap: var(--sp-3); align-content: start; }
+  .demo-title { margin: 0 0 var(--sp-3); }
+
+  /* How it works */
+  .steps { counter-reset: st; }
+  .step { position: relative; padding: var(--sp-5); border-radius: var(--r-lg); background: var(--surface); border: 1px solid var(--line); display: grid; gap: var(--sp-2); align-content: start; }
+  .step .gm-node { margin-bottom: var(--sp-2); }
+  .step h3 { margin: 0; font: 700 var(--fs-md)/1.2 var(--font-display); letter-spacing: -.015em; }
+  .step p { margin: 0; color: var(--text-2); font-size: var(--fs-sm); }
+
+  /* Logo showcase */
+  .logo-tile { border-radius: var(--r-lg); padding: var(--sp-8) var(--sp-6); display: grid; place-items: center; min-height: 200px; border: 1px solid var(--line); position: relative; }
+  .logo-tile .gm-label { position: absolute; left: var(--sp-4); top: var(--sp-3); }
+  .logo-tile--paper { background: #F5F0E6; } .logo-tile--paper .gm-label { color: #6A6575; }
+  .logo-tile--ink { background: #0F0E17; border-color: #2D2A3B; } .logo-tile--ink .gm-label { color: #9C96AC; }
+  .logo-tile--blaze { background: #FF6A2B; border-color: #14121F; } .logo-tile--blaze .gm-label { color: #14121F; }
+  .fav-row { display: flex; align-items: end; gap: var(--sp-4); }
+  .clear-space { position: relative; padding: 18px; outline: 1.5px dashed var(--blaze); outline-offset: 0; }
+
+  /* Palette */
+  .swatches { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-3); }
+  @media (min-width: 48rem) { .swatches { grid-template-columns: repeat(4, 1fr); } }
+  .sw { border-radius: var(--r-md); overflow: hidden; border: 1px solid var(--line); background: var(--surface); }
+  .sw__chip { height: 84px; display: flex; align-items: end; padding: 8px; }
+  .sw__meta { padding: 10px 12px; display: grid; gap: 2px; }
+  .sw__meta b { font: 700 var(--fs-sm)/1.2 var(--font-body); }
+  .trust { display: grid; gap: var(--sp-3); grid-template-columns: 1fr; }
+  @media (min-width: 48rem) { .trust { grid-template-columns: repeat(4, 1fr); } }
+  .trust__card { padding: var(--sp-4); border-radius: var(--r-md); background: var(--c-soft); border: 1.5px solid var(--c); display: grid; gap: var(--sp-2); }
+  .trust__card p { margin: 0; font-size: var(--fs-xs); color: var(--text-2); }
+  .themes { display: grid; gap: var(--sp-4); }
+  @media (min-width: 48rem) { .themes { grid-template-columns: 1fr 1fr; } }
+  .theme-panel { border-radius: var(--r-lg); padding: var(--sp-5); background: var(--bg); color: var(--text); border: 1px solid var(--line); display: grid; gap: var(--sp-4); }
+
+  /* Type */
+  .spec { display: grid; gap: var(--sp-5); }
+  .spec__row { display: grid; gap: var(--sp-2); padding-bottom: var(--sp-5); border-bottom: 1px dashed var(--line); }
+  @media (min-width: 48rem) { .spec__row { grid-template-columns: 200px 1fr; align-items: baseline; } }
+
+  /* Phone frames */
+  .screens { display: grid; gap: var(--sp-8) var(--sp-6); grid-template-columns: minmax(0, 1fr); justify-items: center; }
+  @media (min-width: 64rem) { .screens { grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; } .screen--wide { grid-column: span 2; } }
+  .screen { width: 100%; min-width: 0; max-width: 380px; display: grid; gap: var(--sp-3); }
+  .screen--wide { max-width: none; }
+  .screen__cap { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-2); }
+  .screen__cap h3 { margin: 0; font: 700 var(--fs-md)/1.2 var(--font-display); letter-spacing: -.015em; }
+  .phone { position: relative; background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 34px; overflow: hidden; box-shadow: var(--shadow-2); min-height: 700px; display: flex; flex-direction: column; }
+  .phone__bar { display: flex; justify-content: space-between; padding: 14px 22px 6px; font: 600 12px/1 var(--font-body); color: var(--text); }
+  .phone__app { display: flex; justify-content: space-between; align-items: center; padding: 8px 18px 10px; }
+  .phone__app .wm { height: 22px; }
+  .phone__body { padding: 8px 18px 22px; display: grid; gap: var(--sp-4); align-content: start; flex: 1; }
+  .desk { background: var(--bg); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--shadow-2); }
+  .desk__bar { display: flex; align-items: center; gap: 6px; padding: 10px 14px; border-bottom: 1px solid var(--line); background: var(--surface); }
+  .desk__bar i { width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
+  .desk__url { margin-left: 10px; font: 500 11px/1 var(--font-mono); color: var(--text-3); }
+  .desk__body { display: grid; gap: var(--sp-4); padding: var(--sp-5); }
+  @media (min-width: 64rem) { .desk__body { grid-template-columns: 220px 1fr; } }
+  .side { display: grid; gap: 4px; align-content: start; }
+  .side a { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border-radius: 10px; color: var(--text-2); text-decoration: none; font-size: var(--fs-sm); }
+  .side a.on { background: var(--surface); color: var(--text); font-weight: 650; box-shadow: var(--shadow-1); }
+  .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-3); }
+  .kpi { padding: var(--sp-3) var(--sp-4); border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--line); }
+  .kpi b { display: block; font: 800 var(--fs-xl)/1 var(--font-display); letter-spacing: -.03em; margin-top: 6px; }
+  .checkin { display: grid; gap: var(--sp-4); grid-template-columns: 1fr; padding: var(--sp-5); border-radius: var(--r-lg); background: var(--surface-inverse); color: var(--text-inverse); }
+  @media (min-width: 40rem) { .checkin { grid-template-columns: 1fr auto; align-items: center; } }
+  .checkin .code { font: 600 clamp(1.6rem, 4vw, 2.2rem)/1 var(--font-mono); letter-spacing: .08em; }
+  .checkin .gm-label { color: inherit; opacity: .7; }
+  .qr { width: 132px; height: 132px; padding: 8px; background: #FFFDF8; border-radius: 12px; display: grid; grid-template-columns: repeat(21, 1fr); }
+  .qr i { background: #14121F; } .qr i.o { background: transparent; }
+
+  /* Mini hero inside phone */
+  .mini-hero { position: relative; height: 230px; margin: 0 -18px; }
+  .mini-hero svg { width: 100%; height: 100%; }
+
+  /* Profile header */
+  .id { display: flex; gap: var(--sp-3); align-items: center; }
+  .id h4 { margin: 0; font: 800 var(--fs-lg)/1.1 var(--font-display); letter-spacing: -.02em; }
+  .facts { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+  .facts li { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: center; font-size: var(--fs-sm); }
+  .facts li .gm-node { --node-size: 14px; margin-left: 4px; }
+  .facts b { font-weight: 700; }
+  .tabs { display: flex; gap: var(--sp-4); border-bottom: 1px solid var(--line); }
+  .tabs span { padding-bottom: 8px; font-size: var(--fs-sm); color: var(--text-3); }
+  .tabs span.on { color: var(--text); font-weight: 650; box-shadow: inset 0 -2.5px 0 var(--blaze); }
+  .gloss-list dt { font: 700 var(--fs-md)/1.2 var(--font-display); letter-spacing: -.015em; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .gloss-list dd { margin: 4px 0 var(--sp-4); color: var(--text-2); font-size: var(--fs-sm); padding-bottom: var(--sp-4); border-bottom: 1px dashed var(--line); }
+  .icon { width: 18px; height: 18px; flex: none; }
+  .divider-trail { height: 26px; background: var(--blaze); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 26'%3E%3Cpath d='M0 13C20 0 20 0 40 13S60 26 80 13' fill='none' stroke='%23000' stroke-width='2.5'/%3E%3C/svg%3E") left / 80px 26px repeat-x; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 26'%3E%3Cpath d='M0 13C20 0 20 0 40 13S60 26 80 13' fill='none' stroke='%23000' stroke-width='2.5'/%3E%3C/svg%3E") left / 80px 26px repeat-x; opacity: .9; }
+  .mini-steps { list-style: none; margin: 0; padding: var(--sp-4) 0 0; border-top: 1px dashed var(--line-strong); display: grid; gap: 10px; font-size: var(--fs-sm); color: var(--text-2); }
+  .mini-steps li { display: flex; gap: 12px; align-items: center; } .mini-steps .gm-node { --node-size: 14px; } .mini-steps b { color: var(--text); }
+  .onb-art { margin: 0 -18px; height: 190px; } .onb-art svg { width: 100%; height: 100%; }
+  .onb-dots { display: flex; gap: 6px; } .onb-dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--line-strong); } .onb-dots i.on { width: 24px; border-radius: 4px; background: var(--blaze); }
+  .api { display: grid; gap: var(--sp-6); padding: var(--sp-6) var(--sp-5); }
+  @media (min-width: 64rem) { .api { grid-template-columns: 1fr 1.1fr; padding: var(--sp-8); } }
+  footer { padding-block: var(--sp-12); }
+  .toast-dock { position: absolute; left: 14px; right: 14px; bottom: 16px; z-index: 3; }
+</style>
+</head>
+<body class="gm-base">
+
+<!-- ======= Icon sprite ======= -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-check" viewBox="0 0 12 12"><path d="M2.5 6.4 5 8.8l4.6-5.3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-knot" viewBox="0 0 12 12"><path d="M3 1.5c0 3 6 3 6 4.5S3 7.5 3 10.5M9 1.5c0 1.2-.9 2-2 2.6M5 7.9c-1.1.6-2 1.4-2 2.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="i-bang" viewBox="0 0 12 12"><path d="M6 2.2v4.6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="6" cy="9.6" r="1.3" fill="currentColor"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 16 16"><path d="M3 8h9.5M8.5 3.5 13 8l-4.5 4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 20 20"><rect x="3.5" y="8.5" width="13" height="9" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M6.5 8.5V6a3.5 3.5 0 0 1 7 0v2.5" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+  <symbol id="i-search" viewBox="0 0 20 20"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="m13 13 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 20 20"><rect x="6.5" y="6.5" width="10" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13.5 6.5V5a1.5 1.5 0 0 0-1.5-1.5H5A1.5 1.5 0 0 0 3.5 5v7A1.5 1.5 0 0 0 5 13.5h1.5" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 20 20"><path d="M16 10a6 6 0 1 1-1.8-4.3M16 3.5v3.7h-3.7" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-qr" viewBox="0 0 20 20"><path d="M3 3h5v5H3zM12 3h5v5h-5zM3 12h5v5H3zM12 12h2v2h-2zM15 15h2v2h-2zM12 16h1M16 12h1" fill="none" stroke="currentColor" stroke-width="1.7"/></symbol>
+  <symbol id="i-share" viewBox="0 0 20 20"><path d="M10 13V3.5M6 7l4-4 4 4M4 11v4.5A1.5 1.5 0 0 0 5.5 17h9a1.5 1.5 0 0 0 1.5-1.5V11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 20 20"><circle cx="10" cy="10" r="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.3 4.3l1.4 1.4M14.3 14.3l1.4 1.4M4.3 15.7l1.4-1.4M14.3 5.7l1.4-1.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 20 20"><path d="M16 12.5A6.5 6.5 0 0 1 7.5 4a6.5 6.5 0 1 0 8.5 8.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+  <symbol id="i-api" viewBox="0 0 20 20"><path d="M7 5 2.5 10 7 15M13 5l4.5 5-4.5 5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="mark" viewBox="0 0 64 64"><g fill="none" stroke-linecap="round" stroke-width="6.5"><path class="i" d="M20 6C20 18 44 18 44 30C44 33.96 41.39 36.61 37.88 38.82M26.12 45.18C22.61 47.39 20 50.04 20 54"/><path class="b" d="M44 6C44 9.96 41.39 12.61 37.88 14.82M26.12 21.18C22.61 23.39 20 26.04 20 30C20 42 44 42 44 50"/></g><circle class="n" cx="44" cy="53" r="7.5"/></symbol>
+</svg>
+
+<template id="wm-tpl">
+  <svg class="wm" viewBox="0 0 344 72" role="img" aria-label="Genomap"><g fill="none" stroke-linecap="round" stroke-width="6.5"><path class="i" d="M20 6C20 18 44 18 44 30C44 33.96 41.39 36.61 37.88 38.82M26.12 45.18C22.61 47.39 20 50.04 20 54"/><path class="b" d="M44 6C44 9.96 41.39 12.61 37.88 14.82M26.12 21.18C22.61 23.39 20 26.04 20 30C20 42 44 42 44 50"/></g><circle class="n" cx="44" cy="53" r="7.5"/><g transform="translate(76 2)" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.5"><g class="i"><circle cx="16" cy="32" r="12.75"/><path d="M28.75 19.5V50A12.5 12.5 0 0 1 5 56"/><path d="M41.5 32H66.5A12.5 12.5 0 1 0 63 41"/><path d="M79.5 44.5V19.5M79.5 30A11 11 0 0 1 101.5 30V44.5"/><circle cx="125" cy="32" r="12.75"/><path d="M233.75 19.5V62"/><circle cx="246.5" cy="32" r="12.75"/></g><g class="b"><path d="M150.5 44.5V19.5M150.5 29A9 9 0 0 1 168.5 29V44.5M168.5 29A9 9 0 0 1 186.5 29V44.5"/><circle cx="208" cy="32" r="12.75"/><path d="M220.75 19.5V44.5"/></g></g></svg>
+</template>
+
+<!-- ======= Top bar ======= -->
+<header class="topbar">
+  <div class="wrap">
+    <a href="#top" aria-label="Genomap home" data-wm></a>
+    <nav aria-label="Sections">
+      <a href="#concept" data-es="Concepto">Concept</a>
+      <a href="#logo">Logo</a>
+      <a href="#color" data-es="Color">Color</a>
+      <a href="#type" data-es="Tipografía">Type</a>
+      <a href="#components" data-es="Componentes">Components</a>
+      <a href="#screens" data-es="Pantallas">Screens</a>
+    </nav>
+    <div class="toggles">
+      <div class="gm-seg" role="group" aria-label="Language">
+        <button type="button" data-lang="en" aria-pressed="true">EN</button>
+        <button type="button" data-lang="es" aria-pressed="false">ES</button>
+      </div>
+      <div class="gm-seg" role="group" aria-label="Theme">
+        <button type="button" data-set-theme="light" aria-pressed="true" aria-label="Light"><svg class="icon"><use href="#i-sun"/></svg><span class="t-label" data-es="Claro">Light</span></button>
+        <button type="button" data-set-theme="dark" aria-pressed="false" aria-label="Dark"><svg class="icon"><use href="#i-moon"/></svg><span class="t-label" data-es="Oscuro">Dark</span></button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+<!-- ======= 1. Signature hero ======= -->
+<section class="hero gm-topo" aria-labelledby="hero-title">
+  <div class="wrap hero__text">
+    <span class="gm-label hero__eyebrow"><span class="gm-node"></span><span data-es="Para quienes construyen en Stellar">For people building on Stellar</span></span>
+    <h1 id="hero-title" class="gm-display" data-es="Tu camino es <em>tu prueba.</em>">Your path is <em>your proof.</em></h1>
+    <p class="gm-lede" data-es="Cada hackathon al que vas, ganas o ayudas a organizar deja una huella. Genomap la teje en un rastro verificado: firmado por quien organiza, anclado en Stellar, tuyo de por vida.">Every hackathon you attend, win or help run leaves a mark. Genomap weaves those marks into a verified trail: signed by the organizer, anchored on Stellar, yours for life.</p>
+    <div class="hero__ctas">
+      <a class="gm-btn gm-btn--primary gm-btn--lg" href="#screens"><span data-es="Empieza tu rastro">Start your trail</span> <svg class="icon gm-btn__arrow"><use href="#i-arrow"/></svg></a>
+      <a class="gm-btn gm-btn--secondary gm-btn--lg" href="#validator"><svg class="icon"><use href="#i-search"/></svg><span data-es="Validar a alguien">Validate someone</span></a>
+    </div>
+  </div>
+  <div class="hero__map" aria-hidden="true">
+    <svg id="hero-svg"></svg>
+  </div>
+  <p class="gm-label hero__coord" aria-hidden="true">12°02′S · 77°01′W<br><span data-es="Escala · 1 evento = 1 huella">Scale · 1 event = 1 mark</span></p>
+  <div class="hero__legend">
+    <span class="gm-pill gm-pill--onchain"><span class="gm-pill__glyph"><svg><use href="#i-knot"/></svg></span><span data-es="Anclado en Stellar">On-chain</span></span>
+    <span class="gm-pill gm-pill--verified"><span class="gm-pill__glyph"><svg><use href="#i-check"/></svg></span><span data-es="Verificado">Verified</span></span>
+    <button class="gm-btn gm-btn--ghost gm-btn--sm" type="button" id="replay-hero"><svg class="icon"><use href="#i-refresh"/></svg><span data-es="Repetir">Replay</span></button>
+  </div>
+</section>
+
+<!-- ======= 2. Concept ======= -->
+<section class="block" id="concept">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="gm-label sec-num">01 · <span data-es="Concepto">Concept</span></span>
+      <h2 class="gm-h2" data-es="Genoma + mapa. Dos hebras que se cruzan en cada evento.">Genome + map. Two strands that cross at every event.</h2>
+      <p class="gm-lede" style="max-width:60ch" data-es="La hebra naranja es tu esfuerzo: los eventos a los que llegas. La hebra de tinta es la prueba: la firma de quien organiza y el ancla en Stellar. Donde se cruzan, nace una huella. Con el tiempo, tu camino se enrolla en algo que nadie más puede copiar: tu genoma de constructor.">The blaze strand is your effort: the events you show up for. The ink strand is the proof: the organizer's signature and the anchor on Stellar. Where they cross, a mark is made. Over time your path twists into something nobody else can copy: your builder genome.</p>
+    </div>
+    <div class="grid grid--4 steps">
+      <div class="step"><span class="gm-node gm-node--future"></span><span class="gm-label">01</span><h3 data-es="Llega">Show up</h3><p data-es="Asiste, gana o sé staff en un evento del ecosistema Stellar.">Attend, win or staff an event in the Stellar ecosystem.</p></div>
+      <div class="step"><span class="gm-node gm-node--verified"></span><span class="gm-label">02</span><h3 data-es="Te firman">Get signed</h3><p data-es="Quien organiza escanea tu código y firma tu huella.">The organizer scans your code and signs your mark.</p></div>
+      <div class="step"><span class="gm-node gm-node--onchain"></span><span class="gm-label">03</span><h3 data-es="Se ancla">It's anchored</h3><p data-es="Tu huella queda escrita en Stellar, unida a tu wallet.">Your mark is written on Stellar, tied to your wallet.</p></div>
+      <div class="step"><span class="gm-node"></span><span class="gm-label">04</span><h3 data-es="Compártelo">Share it</h3><p data-es="Cualquier reclutador lo valida en segundos, sin pedirte nada.">Any recruiter validates it in seconds, without asking you.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======= 3. Logo ======= -->
+<section class="block" id="logo">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="gm-label sec-num">02 · Logo</span>
+      <h2 class="gm-h2" data-es="La marca: una hélice que se desenrolla en un camino.">The mark: a helix that unwinds into a path.</h2>
+      <p class="gm-lede" style="max-width:60ch" data-es="Dos hebras tejidas (una pasa por debajo, luego por encima). La hebra naranja termina en un nodo: la huella más reciente, «estás aquí». En el logotipo, «ma» va en naranja: es la sílaba que comparten genoma y map, el punto donde las dos palabras se cruzan.">Two woven strands (one passes under, then over). The blaze strand ends in a node: your latest mark, "you are here". In the wordmark, "ma" is blaze: the syllable that genoma and map share, the point where the two words cross.</p>
+    </div>
+    <div class="grid grid--3">
+      <div class="logo-tile logo-tile--paper" data-theme="light"><span class="gm-label">Paper</span><img src="logo-wordmark.svg" alt="Genomap wordmark" style="width:min(100%,260px)"></div>
+      <div class="logo-tile logo-tile--ink" data-theme="dark"><span class="gm-label">Night</span><svg class="wm" style="height:46px" viewBox="0 0 344 72" aria-label="Genomap wordmark on night" role="img"><use href="#wm-dark"/></svg></div>
+      <div class="logo-tile logo-tile--blaze"><span class="gm-label">Blaze · mono</span><img src="logo-wordmark-mono.svg" alt="Genomap monochrome wordmark" style="width:min(100%,260px)"></div>
+      <div class="logo-tile logo-tile--paper" data-theme="light"><span class="gm-label" data-es="Marca">Mark</span><img src="logo-mark.svg" alt="Genomap mark" width="120" height="120"></div>
+      <div class="logo-tile logo-tile--paper" data-theme="light"><span class="gm-label" data-es="Área de respeto = 1 nodo">Clear space = 1 node</span><div class="clear-space"><img src="logo-mark.svg" alt="" width="72" height="72"></div></div>
+      <div class="logo-tile logo-tile--paper" data-theme="light"><span class="gm-label">Favicon · 64 / 32 / 16</span><div class="fav-row"><img src="favicon.svg" width="64" height="64" alt="Favicon 64px"><img src="favicon.svg" width="32" height="32" alt="Favicon 32px"><img src="favicon.svg" width="16" height="16" alt="Favicon 16px"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======= 4. Color ======= -->
+<section class="block" id="color">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="gm-label sec-num">03 · Color</span>
+      <h2 class="gm-h2" data-es="Papel de campo, tinta de topógrafo y una marca de sendero.">Field paper, surveyor's ink and a trail blaze.</h2>
+      <p class="gm-lede" style="max-width:60ch" data-es="El naranja «blaze» viene de las marcas pintadas en los árboles para señalar senderos. Es la única voz cálida: se usa para el camino, las acciones principales y lo nuevo. La confianza tiene su propio idioma de cuatro estados.">Blaze orange comes from the paint marks hikers leave on trees to signal a trail. It is the only warm voice: the path, primary actions, and what's new. Trust has its own four-state language.</p>
+    </div>
+    <div class="swatches">
+      <div class="sw"><div class="sw__chip" style="background:#FF6A2B"></div><div class="sw__meta"><b>Trail Blaze</b><span class="gm-label">#FF6A2B · dark #FF7A3D</span></div></div>
+      <div class="sw"><div class="sw__chip" style="background:#14121F"></div><div class="sw__meta"><b>Survey Ink</b><span class="gm-label">#14121F</span></div></div>
+      <div class="sw"><div class="sw__chip" style="background:#F5F0E6;box-shadow:inset 0 -1px 0 #DCD3C2"></div><div class="sw__meta"><b>Field Paper</b><span class="gm-label">#F5F0E6 · #FFFDF8</span></div></div>
+      <div class="sw"><div class="sw__chip" style="background:#0F0E17"></div><div class="sw__meta"><b>Night Survey</b><span class="gm-label">#0F0E17 · #1A1826</span></div></div>
+    </div>
+    <h3 class="gm-h3" style="margin:var(--sp-10) 0 var(--sp-4)" data-es="Idioma de confianza">Trust language</h3>
+    <div class="trust">
+      <div class="trust__card" style="--c:var(--signed);--c-soft:var(--signed-soft)"><span class="gm-pill gm-pill--verified gm-pill--lg"><span class="gm-pill__glyph"><svg><use href="#i-check"/></svg></span><span data-es="Verificado">Verified</span></span><p data-es="Firmado por un organizador verificado. Guardado en Genomap. Borde sólido + check.">Signed by a verified organizer. Stored in Genomap. Solid edge + check.</p></div>
+      <div class="trust__card" style="--c:var(--anchored);--c-soft:var(--anchored-soft);border-style:double;border-width:4px"><span class="gm-pill gm-pill--onchain gm-pill--lg"><span class="gm-pill__glyph"><svg><use href="#i-knot"/></svg></span><span data-es="En Stellar">On-chain</span></span><p data-es="Anclado en la red Stellar. La prueba más fuerte. Borde doble (dos hebras) + nudo.">Anchored on the Stellar network. Strongest proof. Double edge (two strands) + knot.</p></div>
+      <div class="trust__card" style="--c:var(--weaving);--c-soft:var(--weaving-soft);border-style:dashed"><span class="gm-pill gm-pill--pending gm-pill--lg"><span class="gm-pill__glyph"></span><span data-es="Anclando…">Anchoring…</span></span><p data-es="Firmado, esperando a Stellar. Guiones en marcha + giro.">Signed, waiting for Stellar. Marching dashes + spinner.</p></div>
+      <div class="trust__card" style="--c:var(--snag);--c-soft:var(--snag-soft);border-style:dashed"><span class="gm-pill gm-pill--failed gm-pill--lg"><span class="gm-pill__glyph"><svg><use href="#i-bang"/></svg></span><span data-es="No se ancló">Didn't anchor</span></span><p data-es="El ancla falló. El registro sigue a salvo; reintentamos. Borde roto + «!».">Anchoring failed. The record is still safe; we retry. Broken edge + "!".</p></div>
+    </div>
+    <h3 class="gm-h3" style="margin:var(--sp-10) 0 var(--sp-4)" data-es="Los dos temas">Both themes</h3>
+    <div class="themes">
+      <div class="theme-panel gm-topo" data-theme="light">
+        <span class="gm-label">Field paper · light</span>
+        <div class="row"><a class="gm-btn gm-btn--primary" href="#color" data-es="Empieza tu rastro">Start your trail</a><a class="gm-btn gm-btn--secondary" href="#color" data-es="Validar">Validate</a></div>
+        <div class="row"><span class="gm-pill gm-pill--onchain"><span class="gm-pill__glyph"><svg><use href="#i-knot"/></svg></span>On-chain</span><span class="gm-pill gm-pill--verified"><span class="gm-pill__glyph"><svg><use href="#i-check"/></svg></span>Verified</span><span class="gm-pill gm-pill--pending"><span class="gm-pill__glyph"></span>Pending</span><span class="gm-pill gm-pill--failed"><span class="gm-pill__glyph"><svg><use href="#i-bang"/></svg></span>Failed</span></div>
+        <p class="gm-body" style="margin:0">Text <b style="color:var(--text)">16.27:1</b> · muted <span style="color:var(--text-3)">4.96:1</span> · link <span class="gm-blaze">5.42:1</span></p>
+      </div>
+      <div class="theme-panel gm-topo" data-theme="dark">
+        <span class="gm-label">Night survey · dark</span>
+        <div class="row"><a class="gm-btn gm-btn--primary" href="#color" data-es="Empieza tu rastro">Start your trail</a><a class="gm-btn gm-btn--secondary" href="#color" data-es="Validar">Validate</a></div>
+        <div class="row"><span class="gm-pill gm-pill--onchain"><span class="gm-pill__glyph"><svg><use href="#i-knot"/></svg></span>On-chain</span><span class="gm-pill gm-pill--verified"><span class="gm-pill__glyph"><svg><use href="#i-check"/></svg></span>Verified</span><span class="gm-pill gm-pill--pending"><span class="gm-pill__glyph"></span>Pending</span><span class="gm-pill gm-pill--failed"><span class="gm-pill__glyph"><svg><use href="#i-bang"/></svg></span>Failed</span></div>
+        <p class="gm-body" style="margin:0">Text <b style="color:var(--text)">16.88:1</b> · muted <span style="color:var(--text-3)">6.73:1</span> · link <span class="gm-blaze">9.20:1</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======= 5. Type ======= -->
+<section class="block" id="type">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="gm-label sec-num">04 · <span data-es="Tipografía">Type</span></span>
+      <h2 class="gm-h2" data-es="Una voz humana, una voz de mapa.">A human voice and a map voice.</h2>
+    </div>
+    <div class="spec">
+      <div class="spec__row"><span class="gm-label">Bricolage Grotesque 800<br>Display</span><p class="gm-display" style="margin:0" data-es="Ganaste. Quedó escrito.">You won. It's on record.</p></div>
+      <div class="spec__row"><span class="gm-label">Bricolage Grotesque 750<br>H2 · H3</span><div><p class="gm-h2" style="margin:0" data-es="Tres eventos en Lima, uno ganado.">Three events in Lima, one won.</p><p class="gm-h3" style="margin:.4em 0 0" data-es="Tu rastro creció esta semana">Your trail grew this week</p></div></div>
+      <div class="spec__row"><span class="gm-label">Instrument Sans 400–650<br>Body · UI</span><p class="gm-lede" style="margin:0;max-width:56ch" data-es="Sin jerga. Cuando un término técnico es inevitable, va subrayado con puntos naranjas y se explica al tocarlo: como una <span class='gm-gloss'><button class='gm-gloss__term' type='button'>wallet</button><span class='gm-gloss__tip' role='tooltip'><b>Wallet</b>Tu llave pública en Stellar. Como un número de cuenta que solo tú controlas.</span></span>.">No jargon. When a technical word is unavoidable it gets a dotted blaze underline and explains itself on tap: like a <span class="gm-gloss"><button class="gm-gloss__term" type="button">wallet</button><span class="gm-gloss__tip" role="tooltip"><b>Wallet</b>Your public key on Stellar. Like an account number only you control.</span></span>.</p></div>
+      <div class="spec__row"><span class="gm-label">Martian Mono 500<br>Labels · addresses</span><div class="stack"><span class="gm-label">−12.0464, −77.0428 · Lima · 14 Nov 2026</span><span class="gm-addr">GBXK7…Q4LM · GDQ2RTN5AF7HXYKM3LPZ6E4VWJQ9C8B2UN5TRK7Y3MDSXQ4LM</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======= 6. Components ======= -->
+<section class="block" id="components">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="gm-label sec-num">05 · <span data-es="Componentes">Components</span></span>
+      <h2 class="gm-h2" data-es="Piezas que se estampan, se tejen y se encienden.">Pieces that stamp, weave and light up.</h2>
+    </div>
+    <div class="grid grid--2">
+      <div class="gm-card stack">
+        <span class="gm-label" data-es="Botones · estampados">Buttons · stamped</span>
+        <div class="row">
+          <button class="gm-btn gm-btn--primary" type="button"><span data-es="Unir mi wallet">Link my wallet</span><svg class="icon gm-btn__arrow"><use href="#i-arrow"/></svg></button>
+          <button class="gm-btn gm-btn--secondary" type="button" data-es="Compartir perfil">Share profile</button>
+          <button class="gm-btn gm-btn--ghost" type="button" data-es="Ahora no">Not now</button>
+        </div>
+        <div class="row">
+          <button class="gm-btn gm-btn--primary gm-btn--sm" type="button" data-es="Emitir">Issue</button>
+          <button class="gm-btn gm-btn--secondary gm-btn--sm" type="button"><svg class="icon"><use href="#i-refresh"/></svg><span data-es="Verificar en Stellar">Verify on-chain</span></button>
+          <button class="gm-btn gm-btn--danger gm-btn--sm" type="button" data-es="Rechazar">Decline</button>
+          <button class="gm-btn gm-btn--secondary gm-btn--sm" type="button" disabled data-es="Desactivado">Disabled</button>
+        </div>
+      </div>
+      <div class="gm-card stack">
+        <span class="gm-label" data-es="Campos">Inputs</span>
+        <label class="gm-field"><span class="gm-field__label" data-es="Tu nombre de usuario">Your username</span><input class="gm-input" value="valeria.dev"><span class="gm-field__hint" data-es="Así te encontrarán: genomap.xyz/@valeria.dev">This is how people find you: genomap.xyz/@valeria.dev</span></label>
+        <label class="gm-field gm-field--error"><span class="gm-field__label" data-es="Código de check-in">Check-in code</span><input class="gm-input gm-input--mono" value="LIMA-7K4"><span class="gm-field__hint" data-es="Faltan caracteres. Los códigos tienen 4 letras, guion y 4 caracteres.">A few characters are missing. Codes look like LIMA-7K4Q.</span></label>
+      </div>
+      <div class="gm-card stack">
+        <span class="gm-label" data-es="Selectores · chips">Selectors · chips</span>
+        <div class="gm-chips" role="group" aria-label="Filter">
+          <button class="gm-chip" aria-pressed="true" type="button"><span data-es="Todo">All</span> <span class="gm-chip__count">7</span></button>
+          <button class="gm-chip" aria-pressed="false" type="button"><span data-es="Ganó">Won</span> <span class="gm-chip__count">1</span></button>
+          <button class="gm-chip" aria-pressed="false" type="button"><span data-es="Asistió">Attended</span> <span class="gm-chip__count">5</span></button>
+          <button class="gm-chip" aria-pressed="false" type="button">Staff <span class="gm-chip__count">1</span></button>
+        </div>
+        <label class="gm-field"><span class="gm-field__label" data-es="Tipo de huella">Mark type</span><select class="gm-select"><option data-es="Asistió">Attended</option><option>Won</option><option>Staff</option></select></label>
+        <div class="row"><span class="gm-role" data-es="Asistió">Attended</span><span class="gm-role gm-role--won" data-es="Ganó">Won</span><span class="gm-role gm-role--staff">Staff</span><span class="gm-role gm-role--speaker" data-es="Ponente">Speaker</span><span class="gm-badge">3</span><span class="gm-badge gm-badge--ink">12</span><span class="gm-badge gm-badge--ring">new</span></div>
+      </div>
+      <div class="gm-card stack">
+        <span class="gm-label" data-es="Nodos del rastro">Trail nodes</span>
+        <div class="row" style="gap:var(--sp-6)">
+          <span class="stack" style="justify-items:center"><span class="gm-node gm-node--lg gm-node--onchain"></span><span class="gm-label">On-chain</span></span>
+          <span class="stack" style="justify-items:center"><span class="gm-node gm-node--lg gm-node--verified"></span><span class="gm-label" data-es="Verif.">Verified</span></span>
+          <span class="stack" style="justify-items:center"><span class="gm-node gm-node--lg gm-node--pending"></span><span class="gm-label" data-es="Pend.">Pending</span></span>
+          <span class="stack" style="justify-items:center"><span class="gm-node gm-node--lg gm-node--failed"></span><span class="gm-label" data-es="Falló">Failed</span></span>
+          <span class="stack" style="justify-items:center"><span class="gm-node gm-node--lg gm-node--new" id="ignite-demo"></span><span class="gm-label" data-es="Nuevo">New</span></span>
+        </div>
+        <div class="gm-minitrail" aria-label="7 marks, 1 pending"><span class="gm-node gm-node--onchain"></span><i></i><span class="gm-node gm-node--onchain"></span><i></i><span class="gm-node gm-node--onchain"></span><i></i><span class="gm-node gm-node--verified"></span><i></i><span class="gm-node gm-node--pending"></span><i class="is-future"></i><span class="gm-node gm-node--future"></span></div>
+        <ol class="gm-stepper" aria-label="Wallet link steps"><li class="is-done"></li><li class="is-current"></li><li></li></ol>
+      </div>
+      <div class="gm-card stack">
+        <span class="gm-label" data-es="Huella (registro)">Record card</span>
+        <article class="gm-record">
+          <div class="row" style="justify-content:space-between"><span class="gm-role gm-role--won" data-es="Ganó">Won</span><span class="gm-pill gm-pill--onchain"><span class="gm-pill__glyph"><svg><use href="#i-knot"/></svg></span><span data-es="En Stellar">On-chain</span></span></div>
+          <h4 class="gm-record__title">Hack Pacífico 2026</h4>
+          <div class="gm-record__meta"><span data-es="Por Andes Builders">By Andes Builders</span><span data-es="hace 1 mes">1 month ago</span></div>
+          <span class="gm-record__coord">−33.4489, −70.6693 · SANTIAGO · #0042</span>
+        </article>
+      </div>
+      <div class="gm-card stack">
+        <span class="gm-label">Toast · banner · tooltip</span>
+        <div class="gm-toast gm-toast--onchain" role="status"><span class="gm-toast__dot"></span><div><strong data-es="Nueva huella en tu rastro">New mark on your trail</strong><span data-es="Stellar Dev Day · anclada en Stellar">Stellar Dev Day · anchored on Stellar</span></div><button type="button" data-es="Ver">View</button></div>
+        <div class="gm-banner gm-banner--failed" role="alert"><svg class="icon" style="color:var(--snag)"><use href="#i-bang"/></svg><div><strong data-es="Esta huella aún no llegó a Stellar">This mark hasn't reached Stellar yet</strong><span data-es="Tu registro está a salvo en Genomap. Reintentamos solos; no tienes que hacer nada.">Your record is safe in Genomap. We retry on our own; you don't need to do anything.</span></div></div>
+        <p class="gm-body" style="margin:128px 0 0;text-align:center"><span class="gm-gloss is-open"><button class="gm-gloss__term" type="button" data-es="anclado">anchored</button><span class="gm-gloss__tip" role="tooltip"><b data-es="Anclar">Anchor</b><span data-es="Escribir una copia de tu huella en la red Stellar. Desde ahí, nadie (ni Genomap) puede cambiarla.">Writing a copy of your mark on the Stellar network. From there, nobody (not even Genomap) can change it.</span></span></span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======= 7. Screens ======= -->
+<section class="block" id="screens">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="gm-label sec-num">06 · <span data-es="Pantallas">Screens</span></span>
+      <h2 class="gm-h2" data-es="Del primer paso a la validación.">From first step to validation.</h2>
+    </div>
+    <div class="screens">
+
+      <!-- Landing mobile -->
+      <div class="screen">
+        <div class="screen__cap"><h3>Landing</h3><span class="gm-label">390</span></div>
+        <div class="phone gm-topo">
+          <div class="phone__bar"><span>9:41</span><span>●●● ▮</span></div>
+          <div class="phone__app"><span data-wm></span><button class="gm-btn gm-btn--secondary gm-btn--sm" type="button" data-es="Entrar">Sign in</button></div>
+          <div class="phone__body">
+            <span class="gm-label" data-es="Para quienes construyen en Stellar">For people building on Stellar</span>
+            <h2 class="gm-h1" style="font-size:2.6rem" data-es="Tu camino es <span class='gm-blaze'>tu prueba.</span>">Your path is <span class="gm-blaze">your proof.</span></h2>
+            <div class="mini-hero" aria-hidden="true"><svg id="mini-hero"></svg></div>
+            <a class="gm-btn gm-btn--primary gm-btn--block gm-btn--lg" href="#screens" data-es="Empieza tu rastro, es gratis">Start your trail, it's free</a>
+            <a class="gm-btn gm-btn--ghost gm-btn--block" href="#validator" data-es="¿Reclutas? Valida a alguien">Recruiting? Validate someone</a>
+            <ol class="mini-steps">
+              <li><span class="gm-node gm-node--verified"></span><span data-es="<b>Llega</b> a un evento">Show <b>up</b> at an event</span></li>
+              <li><span class="gm-node gm-node--onchain"></span><span data-es="Quien organiza <b>firma</b> tu huella">The organizer <b>signs</b> your mark</span></li>
+              <li><span class="gm-node"></span><span data-es="Tu rastro <b>crece</b> para siempre">Your trail <b>grows</b> for good</span></li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <!-- Onboarding (added) -->
+      <div class="screen">
+        <div class="screen__cap"><h3 data-es="Bienvenida">Onboarding</h3><span class="gm-label" data-es="Nueva">Added</span></div>
+        <div class="phone gm-topo">
+          <div class="phone__bar"><span>9:41</span><span>●●● ▮</span></div>
+          <div class="phone__app"><span data-wm></span><button class="gm-btn gm-btn--ghost gm-btn--sm" type="button" data-es="Saltar">Skip</button></div>
+          <div class="phone__body">
+            <div class="onb-art" aria-hidden="true">
+              <svg viewBox="0 0 320 200"><g fill="none" stroke-linecap="round"><path d="M20 170C80 170 90 120 150 120S230 60 300 40" stroke="var(--line-strong)" stroke-width="2" stroke-dasharray="1 8"/><path d="M20 170C80 170 90 120 150 120" stroke="var(--blaze)" stroke-width="4"/></g>
+              <circle cx="150" cy="120" r="16" fill="none" stroke="var(--anchored)" stroke-width="2"/><circle cx="150" cy="120" r="10" fill="var(--anchored)" stroke="var(--bg)" stroke-width="3"/>
+              <circle cx="20" cy="170" r="7" fill="var(--signed)" stroke="var(--bg)" stroke-width="3"/><circle cx="300" cy="40" r="9" fill="none" stroke="var(--line-strong)" stroke-width="2" stroke-dasharray="3 4"/>
+              <text x="150" y="88" text-anchor="middle" class="trail-label trail-label--name" data-es="Hack Pacífico · ganó">Hack Pacífico · won</text><text x="150" y="104" text-anchor="middle" class="trail-label" data-es="Firmado por Andes Builders">Signed by Andes Builders</text></svg>
+            </div>
+            <span class="gm-label">2 / 3</span>
+            <h2 class="gm-h2" style="font-size:2rem" data-es="Una huella = un evento que alguien confirmó.">A mark = one event someone vouched for.</h2>
+            <p class="gm-body" style="margin:0" data-es="No la escribes tú: la firma quien organizó el evento. Por eso vale. Por eso nadie la puede inventar.">You don't write it: whoever ran the event signs it. That's why it counts, and why nobody can fake it.</p>
+            <div class="onb-dots" aria-hidden="true"><i></i><i class="on"></i><i></i></div>
+            <button class="gm-btn gm-btn--primary gm-btn--block gm-btn--lg" type="button"><span data-es="Siguiente">Next</span><svg class="icon gm-btn__arrow"><use href="#i-arrow"/></svg></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sign up -->
+      <div class="screen">
+        <div class="screen__cap"><h3 data-es="Registro">Sign up</h3><span class="gm-label">390</span></div>
+        <div class="phone">
+          <div class="phone__bar"><span>9:41</span><span>●●● ▮</span></div>
+          <div class="phone__app"><span data-wm></span><span class="gm-label">1 / 3</span></div>
+          <div class="phone__body">
+            <ol class="gm-stepper" aria-label="Progress"><li class="is-current"></li><li></li><li></li></ol>
+            <div class="stack"><h2 class="gm-h2" style="font-size:2rem" data-es="Cada rastro empieza con un nombre.">Every trail starts with a name.</h2><p class="gm-body" style="margin:0" data-es="Esto es lo que verán quienes te validen. Puedes cambiarlo luego.">This is what people see when they validate you. You can change it later.</p></div>
+            <label class="gm-field"><span class="gm-field__label" data-es="Nombre">Name</span><input class="gm-input" value="Valeria Quispe"></label>
+            <label class="gm-field gm-field--ok"><span class="gm-field__label" data-es="Usuario">Username</span><input class="gm-input" value="valeria.dev"><span class="gm-field__hint" style="color:var(--anchored-ink)" data-es="✓ Disponible · genomap.xyz/@valeria.dev">✓ Available · genomap.xyz/@valeria.dev</span></label>
+            <label class="gm-field"><span class="gm-field__label">Email</span><input class="gm-input" type="email" placeholder="you@example.com"></label>
+            <label class="gm-field"><span class="gm-field__label" data-es="Bio corta (opcional)">Short bio (optional)</span><textarea class="gm-textarea" style="min-height:76px" data-es-ph="Frontend en Lima, aprendiendo Soroban." placeholder="Frontend dev in Lima, learning Soroban."></textarea></label>
+            <button class="gm-btn gm-btn--primary gm-btn--block gm-btn--lg" type="button" data-es="Continuar">Continue</button>
+            <p class="gm-small" style="margin:0;text-align:center" data-es="Gratis para siempre para quienes aprenden.">Free forever for learners.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Wallet ceremony -->
+      <div class="screen">
+        <div class="screen__cap"><h3 data-es="Ceremonia de wallet">Wallet ceremony</h3><span class="gm-label" data-es="Momento firma 3">Signature 3</span></div>
+        <div class="phone gm-topo">
+          <div class="phone__bar"><span>9:41</span><span>●●● ▮</span></div>
+          <div class="phone__app"><span data-wm></span><span class="gm-label">2 / 3</span></div>
+          <div class="phone__body gm-ceremony">
+            <ol class="gm-stepper" aria-label="Progress" style="width:100%"><li class="is-done"></li><li class="is-current"></li><li></li></ol>
+            <svg class="gm-knot" viewBox="0 0 160 160" aria-hidden="true" id="knot">
+              <circle class="k-ring" cx="80" cy="80" r="70"/>
+              <path class="k-you" d="M20 30C60 30 60 80 80 80S100 130 140 130"/>
+              <path class="k-wallet" d="M20 130C60 130 60 80 80 80S100 30 140 30"/>
+              <circle class="k-node" cx="80" cy="80" r="11"/>
+            </svg>
+            <div class="stack"><h2 class="gm-h2" style="font-size:1.9rem" data-es="Esta wallet será tu ancla. Para siempre.">This wallet becomes your anchor. For good.</h2>
+            <p class="gm-body" style="margin:0" data-es="Todas tus huellas se atarán a ella. Por eso, una vez unida, no se puede quitar ni cambiar.">Every mark you earn ties to it. That's why, once linked, it can't be removed or swapped.</p></div>
+            <div class="gm-wallet-card"><span class="gm-label" data-es="Wallet de Stellar · Freighter">Stellar wallet · Freighter</span><span class="gm-addr">GDQ2RTN5AF7HXYKM3LPZ6E4V<br>WJQ9C8B2UN5TRK7Y3MDSXQ4LM</span></div>
+            <div class="stack" style="width:100%">
+              <label class="gm-check"><input type="checkbox" checked><span data-es="Esta wallet es mía y guardo su frase secreta.">This wallet is mine and I keep its secret phrase safe.</span></label>
+              <label class="gm-check"><input type="checkbox" checked><span data-es="Entiendo que no podré quitarla ni cambiarla.">I understand I can't remove or change it later.</span></label>
+            </div>
+            <button class="gm-btn gm-btn--hold gm-btn--block gm-btn--lg" type="button" id="hold-btn" style="--hold:.62"><svg class="icon"><use href="#i-lock"/></svg><span data-es="Mantén presionado para unir">Press and hold to link</span></button>
+            <p class="gm-small" style="margin:0" data-es="Luego firmarás un mensaje corto en Freighter para probar que es tuya. Es gratis y no mueve dinero. Genomap nunca te pedirá tu frase secreta.">Next, you'll sign a short message in Freighter to prove it's yours. It's free and moves no money. Genomap will never ask for your secret phrase.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Learner dashboard -->
+      <div class="screen">
+        <div class="screen__cap"><h3 data-es="Tu rastro">Your trail</h3><span class="gm-label" data-es="Momento firma 2">Signature 2</span></div>
+        <div class="phone">
+          <div class="phone__bar"><span>9:41</span><span>●●● ▮</span></div>
+          <div class="phone__app"><span data-wm></span><span class="gm-avatar gm-avatar--sm">V</span></div>
+          <div class="phone__body">
+            <div class="stack" style="gap:6px"><span class="gm-label" data-es="Hola, Valeria">Hi, Valeria</span><h2 class="gm-h2" style="font-size:1.9rem" data-es="7 huellas. <span class='gm-blaze'>1 nueva.</span>">7 marks. <span class="gm-blaze">1 new.</span></h2></div>
+            <div class="row"><button class="gm-btn gm-btn--primary gm-btn--sm" type="button"><svg class="icon"><use href="#i-qr"/></svg><span data-es="Ingresar código">Enter code</span></button><button class="gm-btn gm-btn--secondary gm-btn--sm" type="button"><svg class="icon"><use href="#i-share"/></svg><span data-es="Compartir">Share</span></button></div>
+            <ol class="gm-trail" id="dash-trail">
+              <li><span class="gm-node gm-node--onchain gm-node--new" id="new-node"></span>
+                <article class="gm-record" style="box-shadow:var(--glow-blaze);border-color:var(--blaze)"><div class="row" style="justify-content:space-between"><span class="gm-role gm-role--staff">Staff</span><span class="gm-pill gm-pill--onchain"><span class="gm-pill__glyph"><svg><use href="#i-knot"/></svg></span><span data-es="En Stellar">On-chain</span></span></div><h4 class="gm-record__title">Stellar Dev Day</h4><span class="gm-record__coord">19.4326, −99.1332 · CDMX · <span data-es="HOY">TODAY</span></span></article></li>
+              <li><span class="gm-node gm-node--pending"></span>
+                <article class="gm-record"><div class="row" style="justify-content:space-between"><span class="gm-role" data-es="Asistió">Attended</span><span class="gm-pill gm-pill--pending"><span class="gm-pill__glyph"></span><span data-es="Anclando…">Anchoring…</span></span></div><h4 class="gm-record__title">Soroban Bootcamp</h4><span class="gm-record__coord">4.7110, −74.0721 · BOGOTÁ · <span data-es="HACE 2 SEM">2 WK AGO</span></span></article></li>
+              <li><span class="gm-node gm-node--onchain"></span>
+                <article class="gm-record"><div class="row" style="justify-content:space-between"><span class="gm-role gm-role--won" data-es="Ganó">Won</span><span class="gm-pill gm-pill--onchain"><span class="gm-pill__glyph"><svg><use href="#i-knot"/></svg></span><span data-es="En Stellar">On-chain</span></span></div><h4 class="gm-record__title">Hack Pacífico 2026</h4><span class="gm-record__coord">−33.4489, −70.6693 · SANTIAGO · <span data-es="HACE 1 MES">1 MO AGO</span></span></article></li>
+            </ol>
+          </div>
+          <div class="toast-dock"><div class="gm-toast gm-toast--onchain" role="status" style="animation-delay:.9s"><span class="gm-toast__dot"></span><div><strong data-es="Nueva huella en tu rastro">New mark on your trail</strong><span data-es="Anclada en Stellar hace un momento">Anchored on Stellar just now</span></div><button type="button" id="replay-node" data-es="Repetir">Replay</button></div></div>
+        </div>
+      </div>
+
+      <!-- Validator -->
+      <div class="screen" id="validator">
+        <div class="screen__cap"><h3 data-es="Validador público">Public validator</h3><span class="gm-label" data-es="Momento firma 4">Signature 4</span></div>
+        <div class="phone gm-topo">
+          <div class="phone__bar"><span>9:41</span><span>●●● ▮</span></div>
+          <div class="phone__app"><span data-wm></span><span class="gm-label" data-es="Validador">Validator</span></div>
+          <div class="phone__body">
+            <h2 class="gm-h2" style="font-size:1.8rem" data-es="¿A quién quieres validar?">Who do you want to validate?</h2>
+            <form class="gm-search" onsubmit="return false"><label class="gm-sr" for="v-q" data-es="Usuario o wallet">Username or wallet</label><input id="v-q" class="gm-input" value="@valeria.dev"><button class="gm-btn gm-btn--primary gm-btn--sm" type="submit" aria-label="Search"><svg class="icon"><use href="#i-search"/></svg></button></form>
+            <div class="gm-card gm-card--raised gm-reveal stack" id="reveal-card" style="gap:var(--sp-4)">
+              <div class="id"><span class="gm-avatar">V</span><div><h4>Valeria Quispe</h4><span class="gm-small">@valeria.dev · Lima</span></div></div>
+              <p class="gm-body" style="margin:0;font-size:var(--fs-sm)" data-es="Frontend en Lima, aprendiendo Soroban. Me gusta enseñar.">Frontend dev in Lima, learning Soroban. Likes teaching.</p>
+              <ul class="facts">
+                <li><span class="gm-node gm-node--onchain" style="--c:var(--blaze)"></span><span data-es="<b>Ganó un hackathon</b> · hace 1 mes"><b>Won a hackathon</b> · 1 month ago</span></li>
+                <li><span class="gm-node gm-node--onchain"></span><span data-es="<b>Asistió a 5 eventos Stellar</b>"><b>Attended 5 Stellar events</b></span></li>
+                <li><span class="gm-node gm-node--verified"></span><span data-es="<b>Fue staff</b> en 1 evento"><b>Was staff</b> at 1 event</span></li>
+              </ul>
+              <div class="gm-minitrail"><span class="gm-node gm-node--onchain"></span><i></i><span class="gm-node gm-node--onchain"></span><i></i><span class="gm-node gm-node--onchain"></span><i></i><span class="gm-node gm-node--onchain"></span><i></i><span class="gm-node gm-node--onchain"></span><i></i><span class="gm-node gm-node--pending"></span><i></i><span class="gm-node gm-node--onchain"></span></div>
+              <div class="gm-banner gm-banner--onchain"><svg class="icon" style="color:var(--anchored)"><use href="#i-knot"/></svg><div><strong data-es="Coincide con Stellar">Matches the Stellar network</strong><span class="gm-small" data-es="6 de 7 huellas comprobadas en la red · hace un momento">6 of 7 marks checked on-chain · just now</span></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Verify on-chain compare (added) -->
+      <div class="screen">
+        <div class="screen__cap"><h3 data-es="Verificar en Stellar">Verify on-chain</h3><span class="gm-label" data-es="Nueva">Added</span></div>
+        <div class="phone">
+          <div class="phone__bar"><span>9:41</span><span>●●● ▮</span></div>
+          <div class="phone__app"><span data-wm></span><span class="gm-label">@valeria.dev</span></div>
+          <div class="phone__body">
+            <div class="stack" style="gap:6px"><span class="gm-label" data-es="Comparación · hace un momento">Comparison · just now</span><h2 class="gm-h2" style="font-size:1.8rem" data-es="Lo que dice Genomap vs. lo que dice Stellar.">What Genomap says vs. what Stellar says.</h2></div>
+            <p class="gm-body" style="margin:0;font-size:var(--fs-sm)" data-es="Leímos cada huella directo de la red, sin pasar por nuestra base de datos.">We read each mark straight from the network, bypassing our own database.</p>
+            <div class="gm-compare" role="table" aria-label="Genomap vs Stellar">
+              <div class="gm-compare__head" role="row"><span class="gm-label" role="columnheader" data-es="Huella">Mark</span><span class="gm-label" role="columnheader">Genomap</span><span class="gm-label" role="columnheader">Stellar</span></div>
+              <div class="gm-compare__row" role="row"><span>Stellar Dev Day</span><span class="gm-tick gm-tick--ok"><svg><use href="#i-check"/></svg></span><span class="gm-tick gm-tick--ok"><svg><use href="#i-check"/></svg></span></div>
+              <div class="gm-compare__row" role="row"><span>Hack Pacífico</span><span class="gm-tick gm-tick--ok"><svg><use href="#i-check"/></svg></span><span class="gm-tick gm-tick--ok"><svg><use href="#i-check"/></svg></span></div>
+              <div class="gm-compare__row" role="row"><span>Soroban Bootcamp<br><span class="gm-small" data-es="Anclando…">Anchoring…</span></span><span class="gm-tick gm-tick--ok"><svg><use href="#i-check"/></svg></span><span class="gm-tick gm-tick--wait" title="Anchoring"></span></div>
+              <div class="gm-compare__row is-mismatch" role="row"><span><b>Build Week</b><br><span class="gm-small" style="color:var(--snag-ink)" data-es="Rol distinto: «ganó» vs «asistió»">Role differs: "won" vs "attended"</span></span><span class="gm-tick gm-tick--ok"><svg><use href="#i-check"/></svg></span><span class="gm-tick gm-tick--miss"><svg><use href="#i-bang"/></svg></span></div>
+            </div>
+            <div class="gm-banner gm-banner--failed"><svg class="icon" style="color:var(--snag)"><use href="#i-bang"/></svg><div><strong data-es="1 diferencia encontrada">1 difference found</strong><span class="gm-small" style="color:var(--text-2)" data-es="Stellar manda. Mostramos la versión de la red y avisamos al organizador.">Stellar wins. We show the network's version and notify the organizer.</span></div></div>
+            <div class="row"><button class="gm-btn gm-btn--secondary gm-btn--sm" type="button"><svg class="icon"><use href="#i-refresh"/></svg><span data-es="Comprobar de nuevo">Check again</span></button><a class="gm-btn gm-btn--ghost gm-btn--sm" href="#screens" data-es="Ver la transacción ↗">View transaction ↗</a></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Public profile -->
+      <div class="screen">
+        <div class="screen__cap"><h3 data-es="Perfil público">Public profile</h3><span class="gm-label">390</span></div>
+        <div class="phone">
+          <div class="phone__bar"><span>9:41</span><span>●●● ▮</span></div>
+          <div class="phone__app"><span data-wm></span><button class="gm-btn gm-btn--secondary gm-btn--sm" type="button"><svg class="icon"><use href="#i-copy"/></svg><span data-es="Copiar enlace">Copy link</span></button></div>
+          <div class="phone__body">
+            <div class="id"><span class="gm-avatar">V</span><div><h4>Valeria Quispe</h4><span class="gm-small">genomap.xyz/@valeria.dev</span></div></div>
+            <div class="gm-wallet-card" style="grid-template-columns:auto 1fr;align-items:center"><svg class="icon"><use href="#i-lock"/></svg><div class="stack" style="gap:2px"><span class="gm-label" data-es="Wallet ancla · desde mar 2026">Anchor wallet · since Mar 2026</span><span class="gm-addr">GDQ2…XQ4LM</span></div></div>
+            <div class="kpis"><div class="kpi"><span class="gm-label" data-es="Huellas">Marks</span><b>7</b></div><div class="kpi"><span class="gm-label" data-es="Ganó">Won</span><b class="gm-blaze">1</b></div><div class="kpi"><span class="gm-label" data-es="Ciudades">Cities</span><b>4</b></div></div>
+            <div class="tabs"><span class="on" data-es="Rastro">Trail</span><span data-es="Mapa">Map</span><span>Bio</span></div>
+            <ol class="gm-trail">
+              <li><span class="gm-node gm-node--onchain"></span><article class="gm-record"><div class="row" style="justify-content:space-between"><span class="gm-role gm-role--staff">Staff</span><span class="gm-pill gm-pill--onchain"><span class="gm-pill__glyph"><svg><use href="#i-knot"/></svg></span>On-chain</span></div><h4 class="gm-record__title">Stellar Dev Day</h4><span class="gm-record__coord">CDMX · 24 NOV 2026</span></article></li>
+              <li><span class="gm-node gm-node--onchain"></span><article class="gm-record"><div class="row" style="justify-content:space-between"><span class="gm-role gm-role--won" data-es="Ganó">Won</span><span class="gm-pill gm-pill--onchain"><span class="gm-pill__glyph"><svg><use href="#i-knot"/></svg></span>On-chain</span></div><h4 class="gm-record__title">Hack Pacífico 2026</h4><span class="gm-record__coord">SANTIAGO · 20 OCT 2026</span></article></li>
+            </ol>
+            <button class="gm-btn gm-btn--secondary gm-btn--block" type="button"><svg class="icon"><use href="#i-refresh"/></svg><span data-es="Volver a verificar en Stellar">Re-check against Stellar</span></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings / privacy (added) -->
+      <div class="screen">
+        <div class="screen__cap"><h3 data-es="Ajustes y privacidad">Settings & privacy</h3><span class="gm-label" data-es="Nueva">Added</span></div>
+        <div class="phone">
+          <div class="phone__bar"><span>9:41</span><span>●●● ▮</span></div>
+          <div class="phone__app"><span data-wm></span><span class="gm-avatar gm-avatar--sm">V</span></div>
+          <div class="phone__body">
+            <h2 class="gm-h2" style="font-size:1.8rem" data-es="Tú decides qué se ve.">You choose what people see.</h2>
+            <div class="gm-card stack" style="gap:var(--sp-4)">
+              <label class="gm-switch"><span class="gm-switch__text"><span data-es="Perfil público">Public profile</span><small data-es="Cualquiera con tu enlace puede validarte.">Anyone with your link can validate you.</small></span><input type="checkbox" checked></label>
+              <label class="gm-switch"><span class="gm-switch__text"><span data-es="Mostrar dirección completa">Show full wallet address</span><small data-es="Si está apagado, mostramos GDQ2…XQ4LM.">When off, we show GDQ2…XQ4LM.</small></span><input type="checkbox"></label>
+              <label class="gm-switch"><span class="gm-switch__text"><span data-es="Encontrable por wallet">Findable by wallet</span><small data-es="Permite buscarte pegando tu dirección.">Lets people find you by pasting your address.</small></span><input type="checkbox" checked></label>
+            </div>
+            <span class="gm-label" data-es="Huellas visibles · 6 de 7">Visible marks · 6 of 7</span>
+            <div class="gm-rows">
+              <label class="gm-row gm-switch"><span class="gm-switch__text"><span>Hack Pacífico 2026</span><small data-es="Ganó · en Stellar">Won · on-chain</small></span><input type="checkbox" checked></label>
+              <label class="gm-row gm-switch"><span class="gm-switch__text"><span>Andes Builders Night</span><small data-es="Oculta en tu perfil. Sigue existiendo en Stellar.">Hidden on your profile. Still exists on Stellar.</small></span><input type="checkbox"></label>
+            </div>
+            <div class="gm-wallet-card" style="grid-template-columns:auto 1fr;align-items:center"><svg class="icon"><use href="#i-lock"/></svg><div class="stack" style="gap:2px"><span class="gm-label" data-es="Wallet ancla · permanente">Anchor wallet · permanent</span><span class="gm-small" data-es="No se puede quitar. Ocultar huellas solo cambia lo que muestra Genomap.">Can't be removed. Hiding marks only changes what Genomap shows.</span></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Organizer request -->
+      <div class="screen">
+        <div class="screen__cap"><h3 data-es="Solicitud de organizador">Organizer request</h3><span class="gm-label">390</span></div>
+        <div class="phone">
+          <div class="phone__bar"><span>9:41</span><span>●●● ▮</span></div>
+          <div class="phone__app"><span data-wm></span><span class="gm-label" data-es="Organizadores">Organizers</span></div>
+          <div class="phone__body">
+            <div class="stack"><h2 class="gm-h2" style="font-size:1.8rem" data-es="Firma las huellas de tu comunidad.">Sign the marks of your community.</h2><p class="gm-body" style="margin:0;font-size:var(--fs-sm)" data-es="Una persona de nuestro equipo te contactará para verificar tu organización. Suele tomar 2–3 días hábiles.">A person from our team will contact you to verify your organization. It usually takes 2–3 business days.</p></div>
+            <label class="gm-field"><span class="gm-field__label" data-es="Organización o comunidad">Organization or community</span><input class="gm-input" value="Andes Builders"></label>
+            <label class="gm-field"><span class="gm-field__label" data-es="Sitio web o red social">Website or social link</span><input class="gm-input" value="andesbuilders.org"></label>
+            <label class="gm-field"><span class="gm-field__label" data-es="¿Qué eventos organizas?">What events do you run?</span><select class="gm-select"><option data-es="Hackathons y bootcamps">Hackathons and bootcamps</option></select></label>
+            <label class="gm-field"><span class="gm-field__label" data-es="Cuéntanos un evento pasado">Tell us about a past event</span><textarea class="gm-textarea" style="min-height:80px">Hack Pacífico 2026, 180 builders, Santiago.</textarea><span class="gm-field__hint" data-es="Enlaces a fotos o publicaciones ayudan a verificar más rápido.">Links to photos or posts help us verify faster.</span></label>
+            <button class="gm-btn gm-btn--primary gm-btn--block gm-btn--lg" type="button" data-es="Enviar solicitud">Send request</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Moderator queue -->
+      <div class="screen">
+        <div class="screen__cap"><h3 data-es="Cola de moderación">Moderator queue</h3><span class="gm-label">390</span></div>
+        <div class="phone">
+          <div class="phone__bar"><span>9:41</span><span>●●● ▮</span></div>
+          <div class="phone__app"><span data-wm></span><span class="gm-badge">3</span></div>
+          <div class="phone__body">
+            <div class="stack" style="gap:6px"><span class="gm-label" data-es="Moderación">Moderation</span><h2 class="gm-h2" style="font-size:1.8rem" data-es="3 organizadores esperan.">3 organizers waiting.</h2></div>
+            <div class="gm-chips"><button class="gm-chip" aria-pressed="true" type="button" data-es="Nuevas">New</button><button class="gm-chip" aria-pressed="false" type="button" data-es="En llamada">On a call</button><button class="gm-chip" aria-pressed="false" type="button" data-es="Resueltas">Done</button></div>
+            <article class="gm-card stack" style="border-color:var(--text)">
+              <div class="gm-card__head" style="margin:0"><div><b>Andes Builders</b><div class="gm-small">andesbuilders.org · <span data-es="hace 2 días">2 days ago</span></div></div><span class="gm-pill gm-pill--pending"><span class="gm-pill__glyph"></span><span data-es="Revisando">Reviewing</span></span></div>
+              <p class="gm-body" style="margin:0;font-size:var(--fs-sm)">"Hack Pacífico 2026, 180 builders, Santiago."</p>
+              <label class="gm-check"><input type="checkbox" checked><span data-es="Verificado en llamada (fuera de la app)">Verified on a call (outside the app)</span></label>
+              <div class="row"><button class="gm-btn gm-btn--primary gm-btn--sm" type="button" data-es="Aprobar">Approve</button><button class="gm-btn gm-btn--secondary gm-btn--sm" type="button" data-es="Pedir más info">Ask for more</button><button class="gm-btn gm-btn--ghost gm-btn--sm" type="button" data-es="Rechazar">Decline</button></div>
+            </article>
+            <div class="gm-rows">
+              <div class="gm-row"><div><div class="gm-row__title">Soroban Bogotá</div><div class="gm-row__sub" data-es="Meetup · hace 3 días">Meetup · 3 days ago</div></div><span class="gm-pill gm-pill--neutral" data-es="Nueva">New</span></div>
+              <div class="gm-row"><div><div class="gm-row__title">Lumen Lab CDMX</div><div class="gm-row__sub" data-es="Bootcamp · hace 5 días">Bootcamp · 5 days ago</div></div><span class="gm-pill gm-pill--neutral" data-es="Nueva">New</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Glossary -->
+      <div class="screen">
+        <div class="screen__cap"><h3 data-es="Glosario">Glossary</h3><span class="gm-label">390</span></div>
+        <div class="phone">
+          <div class="phone__bar"><span>9:41</span><span>●●● ▮</span></div>
+          <div class="phone__app"><span data-wm></span><span class="gm-label">A–Z</span></div>
+          <div class="phone__body">
+            <h2 class="gm-h2" style="font-size:1.8rem" data-es="Palabras raras, explicadas en humano.">Odd words, explained in human.</h2>
+            <dl class="gloss-list" style="margin:0">
+              <dt>Wallet <span class="gm-label" data-es="billetera">billetera</span></dt><dd data-es="Tu identidad en Stellar. Una llave que solo tú controlas; tus huellas se atan a ella.">Your identity on Stellar. A key only you control; your marks tie to it.</dd>
+              <dt><span data-es="Anclar">Anchor</span> <span class="gm-label">on-chain</span></dt><dd data-es="Escribir una copia de tu huella en la red Stellar, donde nadie puede cambiarla.">Writing a copy of your mark on the Stellar network, where nobody can change it.</dd>
+              <dt>Stellar <span class="gm-label" data-es="red">network</span></dt><dd data-es="Una red pública y abierta. Piensa en ella como un registro que todo el mundo puede leer.">A public, open network. Think of it as a ledger anyone in the world can read.</dd>
+              <dt>Soroban <span class="gm-label" data-es="contrato">contract</span></dt><dd data-es="El programa en Stellar que guarda las huellas de Genomap. Sigue reglas que nadie puede saltarse.">The program on Stellar that stores Genomap marks. It follows rules nobody can skip.</dd>
+              <dt><span data-es="Huella">Mark</span> <span class="gm-label" data-es="registro">record</span></dt><dd data-es="La constancia de que estuviste, ganaste o ayudaste en un evento, firmada por quien lo organizó.">Proof that you attended, won or helped at an event, signed by whoever organized it.</dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+
+      <!-- Organizer dashboard (wide) -->
+      <div class="screen screen--wide">
+        <div class="screen__cap"><h3 data-es="Panel de organizador">Organizer dashboard</h3><span class="gm-label">1280</span></div>
+        <div class="desk">
+          <div class="desk__bar"><i></i><i></i><i></i><span class="desk__url">genomap.xyz/organizer</span></div>
+          <div class="desk__body">
+            <nav class="side" aria-label="Organizer">
+              <span data-wm style="padding:4px 10px 14px"></span>
+              <a class="on" href="#screens"><span data-es="Eventos">Events</span><span class="gm-badge gm-badge--ink">4</span></a>
+              <a href="#screens" data-es="Huellas emitidas">Issued marks</a>
+              <a href="#screens" data-es="Equipo">Team</a>
+              <a href="#screens" data-es="Ajustes">Settings</a>
+            </nav>
+            <div class="stack" style="gap:var(--sp-4)">
+              <div class="row" style="justify-content:space-between"><div><span class="gm-label">Andes Builders · <span data-es="Organizador verificado">Verified organizer</span></span><h2 class="gm-h2" style="font-size:1.9rem;margin-top:4px">Stellar Dev Day · CDMX</h2></div><button class="gm-btn gm-btn--primary" type="button" data-es="+ Crear evento">+ Create event</button></div>
+              <div class="kpis"><div class="kpi"><span class="gm-label" data-es="Emitidas">Issued</span><b>128</b></div><div class="kpi"><span class="gm-label" data-es="En Stellar">On-chain</span><b style="color:var(--anchored-ink)">121</b></div><div class="kpi"><span class="gm-label" data-es="Con problema">Snagged</span><b style="color:var(--snag-ink)">2</b></div></div>
+              <div class="checkin">
+                <div class="stack"><span class="gm-label" data-es="Check-in abierto · cierra en 01:42:10">Check-in open · closes in 01:42:10</span><span class="code">CDMX-7K4Q</span><span style="font-size:var(--fs-sm);opacity:.8" data-es="Muéstralo en pantalla. Cada asistente lo escanea o lo escribe para recibir su huella.">Put it on screen. Each attendee scans or types it to receive their mark.</span><div class="row"><button class="gm-btn gm-btn--primary gm-btn--sm" type="button" data-es="Pantalla completa">Full screen</button><button class="gm-btn gm-btn--sm" type="button" style="--btn-bg:transparent;--btn-fg:var(--text-inverse);--btn-edge:var(--text-inverse)" data-es="Cerrar check-in">Close check-in</button></div></div>
+                <div class="qr" id="qr" aria-label="QR code for CDMX-7K4Q" role="img"></div>
+              </div>
+              <div class="gm-rows">
+                <div class="gm-row"><div><div class="gm-row__title">Valeria Quispe <span class="gm-role gm-role--staff">Staff</span></div><div class="gm-row__sub gm-mono">GDQ2…XQ4LM · 10:42</div></div><span class="gm-pill gm-pill--onchain"><span class="gm-pill__glyph"><svg><use href="#i-knot"/></svg></span><span data-es="En Stellar">On-chain</span></span></div>
+                <div class="gm-row"><div><div class="gm-row__title">Mateo Rojas <span class="gm-role" data-es="Asistió">Attended</span></div><div class="gm-row__sub gm-mono">GA7M…P2RT · 10:44</div></div><span class="gm-pill gm-pill--pending"><span class="gm-pill__glyph"></span><span data-es="Anclando…">Anchoring…</span></span></div>
+                <div class="gm-row"><div><div class="gm-row__title">Lucía Fernández <span class="gm-role" data-es="Asistió">Attended</span></div><div class="gm-row__sub gm-mono">GC3X…9KLA · 10:45</div></div><div class="row"><span class="gm-pill gm-pill--failed"><span class="gm-pill__glyph"><svg><use href="#i-bang"/></svg></span><span data-es="No se ancló">Didn't anchor</span></span><button class="gm-btn gm-btn--secondary gm-btn--sm" type="button" data-es="Reintentar">Retry</button></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Error / empty states -->
+      <div class="screen">
+        <div class="screen__cap"><h3 data-es="Vacíos y errores">Empty & error</h3><span class="gm-label">390</span></div>
+        <div class="phone">
+          <div class="phone__bar"><span>9:41</span><span>●●● ▮</span></div>
+          <div class="phone__app"><span data-wm></span><span class="gm-label" data-es="Estados">States</span></div>
+          <div class="phone__body">
+            <div class="gm-empty">
+              <svg class="gm-empty__art" viewBox="0 0 120 90" aria-hidden="true"><path d="M8 78C30 78 30 52 52 52S70 26 92 22" fill="none" stroke="currentColor" stroke-width="3" stroke-dasharray="2 8" stroke-linecap="round"/><circle cx="8" cy="78" r="7" fill="var(--blaze)" stroke="#14121F" stroke-width="2"/><circle cx="102" cy="18" r="9" fill="none" stroke="currentColor" stroke-width="2.5" stroke-dasharray="4 4"/></svg>
+              <h3 data-es="Tu rastro empieza con un evento.">Your trail starts with one event.</h3>
+              <p data-es="Cuando un organizador te dé un código, ingrésalo aquí y verás tu primera huella.">When an organizer gives you a code, enter it here and watch your first mark appear.</p>
+              <button class="gm-btn gm-btn--primary gm-btn--sm" type="button" data-es="Tengo un código">I have a code</button>
+            </div>
+            <div class="gm-banner gm-banner--failed" role="alert"><svg class="icon" style="color:var(--snag)"><use href="#i-bang"/></svg><div><strong data-es="No coincide con Stellar">Doesn't match Stellar</strong><span class="gm-small" style="color:var(--text-2)" data-es="Una huella en Genomap no aparece en la red. Ya avisamos al organizador; tu perfil muestra solo lo comprobado.">One mark in Genomap isn't on the network. We've told the organizer; your profile only shows what checks out.</span></div></div>
+            <div class="gm-banner gm-banner--pending"><span class="gm-node gm-node--pending" style="--node-size:16px;margin-top:2px"></span><div><strong data-es="Anclando tu huella…">Anchoring your mark…</strong><span class="gm-small" style="color:var(--text-2)" data-es="Suele tardar menos de un minuto. Ya está firmada y a salvo.">Usually under a minute. It's already signed and safe.</span></div></div>
+            <div class="gm-card stack" style="text-align:center;justify-items:center">
+              <span class="gm-label" data-es="Validador · sin resultados">Validator · no match</span>
+              <b style="font:700 var(--fs-md)/1.2 var(--font-display)" data-es="No encontramos un rastro para «@juan.dev»">No trail found for "@juan.dev"</b>
+              <span class="gm-small" data-es="Revisa el usuario, o pega su dirección de wallet (empieza con G).">Check the spelling, or paste their wallet address (it starts with G).</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- API explainer (added, wide) -->
+      <div class="screen screen--wide">
+        <div class="screen__cap"><h3 data-es="API para reclutadores y agentes">Recruiter & agent API</h3><span class="gm-label" data-es="Nueva · 1280">Added · 1280</span></div>
+        <div class="desk">
+          <div class="desk__bar"><i></i><i></i><i></i><span class="desk__url">genomap.xyz/api</span></div>
+          <div class="api">
+            <div class="stack" style="gap:var(--sp-4);align-content:start">
+              <span class="gm-label" data-es="Para equipos de talento">For hiring teams</span>
+              <h2 class="gm-h2" style="font-size:2.1rem" data-es="Valida a 1 o a 10.000 builders. Desde tu código o tu agente.">Validate 1 builder or 10,000. From your code or your agent.</h2>
+              <p class="gm-body" style="margin:0" data-es="La misma respuesta que ve el validador público, en JSON. Cada huella trae su prueba en Stellar, para que no tengas que confiar en nosotros.">The same answer the public validator shows, as JSON. Every mark ships with its Stellar proof, so you don't have to take our word for it.</p>
+              <ul class="facts">
+                <li><span class="gm-node gm-node--onchain"></span><span data-es="<b>REST</b> · un endpoint por persona o por lote"><b>REST</b> · one endpoint per person or per batch</span></li>
+                <li><span class="gm-node gm-node--verified"></span><span data-es="<b>Servidor MCP</b> · tu agente pregunta en lenguaje natural"><b>MCP server</b> · your agent asks in plain language</span></li>
+                <li><span class="gm-node"></span><span data-es="<b>Solo perfiles públicos</b> · respetamos la privacidad de cada builder"><b>Public profiles only</b> · each builder's privacy settings apply</span></li>
+              </ul>
+              <div class="row"><button class="gm-btn gm-btn--primary" type="button"><svg class="icon"><use href="#i-api"/></svg><span data-es="Pedir una API key">Request an API key</span></button><button class="gm-btn gm-btn--ghost" type="button" data-es="Leer la documentación">Read the docs</button></div>
+            </div>
+            <div class="stack" style="gap:var(--sp-3);min-width:0">
+              <pre class="gm-code"><span class="c"># Who is @valeria.dev?</span>
+<span class="k">curl</span> https://api.genomap.xyz/v1/trail/<span class="s">valeria.dev</span> \
+  -H <span class="s">"Authorization: Bearer $GENOMAP_KEY"</span></pre>
+              <pre class="gm-code">{
+  <span class="n">"name"</span>: <span class="s">"Valeria Quispe"</span>,
+  <span class="n">"wallet"</span>: <span class="s">"GDQ2…XQ4LM"</span>,
+  <span class="n">"summary"</span>: { <span class="n">"won"</span>: 1, <span class="n">"attended"</span>: 5, <span class="n">"staff"</span>: 1 },
+  <span class="n">"marks"</span>: [{
+    <span class="n">"event"</span>: <span class="s">"Hack Pacífico 2026"</span>, <span class="n">"role"</span>: <span class="s">"won"</span>,
+    <span class="n">"status"</span>: <span class="s">"anchored"</span>, <span class="n">"tx"</span>: <span class="s">"9f3c…e21a"</span>
+  }]
+}</pre>
+              <pre class="gm-code"><span class="c">// MCP · ask your agent</span>
+<span class="s">"Which of these 40 candidates won a Stellar hackathon this year?"</span></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 404 (added) -->
+      <div class="screen">
+        <div class="screen__cap"><h3>404</h3><span class="gm-label" data-es="Nueva">Added</span></div>
+        <div class="phone gm-topo">
+          <div class="phone__bar"><span>9:41</span><span>●●● ▮</span></div>
+          <div class="phone__app"><span data-wm></span></div>
+          <div class="phone__body" style="align-content:center;text-align:center;justify-items:center">
+            <svg viewBox="0 0 220 160" width="220" height="160" aria-hidden="true"><g fill="none" stroke-linecap="round"><path d="M10 140C60 140 70 90 110 90" stroke="var(--blaze)" stroke-width="4"/><path d="M122 88C156 82 166 40 210 30" stroke="var(--line-strong)" stroke-width="3" stroke-dasharray="2 9"/></g><circle cx="110" cy="90" r="10" fill="var(--bg)" stroke="var(--blaze)" stroke-width="3"/><text x="110" y="64" text-anchor="middle" class="trail-label" data-es="FIN DEL MAPA">EDGE OF THE MAP</text></svg>
+            <span class="gm-label">404</span>
+            <h2 class="gm-h2" style="font-size:2rem" data-es="Este camino aún no lleva a ningún lado.">This path doesn't lead anywhere. Yet.</h2>
+            <p class="gm-body" style="margin:0" data-es="Puede que el enlace esté mal escrito o que el perfil sea privado.">The link may be mistyped, or the profile may be private.</p>
+            <a class="gm-btn gm-btn--primary" href="#top" data-es="Volver al mapa">Back to the map</a>
+            <a class="gm-btn gm-btn--ghost gm-btn--sm" href="#validator" data-es="Buscar a alguien">Search for someone</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap stack">
+    <div class="divider-trail" aria-hidden="true"></div>
+    <div class="row" style="justify-content:space-between"><span data-wm></span><span class="gm-label" data-es="Genoma + map · tu rastro, verificado">Genoma + map · your trail, verified</span></div>
+  </div>
+</footer>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="wm-dark" viewBox="0 0 344 72"><g fill="none" stroke-linecap="round" stroke-width="6.5"><path stroke="#F5F0E6" d="M20 6C20 18 44 18 44 30C44 33.96 41.39 36.61 37.88 38.82M26.12 45.18C22.61 47.39 20 50.04 20 54"/><path stroke="#FF7A3D" d="M44 6C44 9.96 41.39 12.61 37.88 14.82M26.12 21.18C22.61 23.39 20 26.04 20 30C20 42 44 42 44 50"/></g><circle fill="#FF7A3D" cx="44" cy="53" r="7.5"/><g transform="translate(76 2)" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.5"><g stroke="#F5F0E6"><circle cx="16" cy="32" r="12.75"/><path d="M28.75 19.5V50A12.5 12.5 0 0 1 5 56"/><path d="M41.5 32H66.5A12.5 12.5 0 1 0 63 41"/><path d="M79.5 44.5V19.5M79.5 30A11 11 0 0 1 101.5 30V44.5"/><circle cx="125" cy="32" r="12.75"/><path d="M233.75 19.5V62"/><circle cx="246.5" cy="32" r="12.75"/></g><g stroke="#FF7A3D"><path d="M150.5 44.5V19.5M150.5 29A9 9 0 0 1 168.5 29V44.5M168.5 29A9 9 0 0 1 186.5 29V44.5"/><circle cx="208" cy="32" r="12.75"/><path d="M220.75 19.5V44.5"/></g></g></symbol></svg>
+
+<script>
+(() => {
+  const root = document.documentElement;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const NS = 'http://www.w3.org/2000/svg';
+
+  /* ---- Wordmarks ---- */
+  const tpl = document.getElementById('wm-tpl');
+  document.querySelectorAll('[data-wm]').forEach(el => el.appendChild(tpl.content.cloneNode(true)));
+
+  /* ---- Theme toggle ---- */
+  const params = new URLSearchParams(location.search);
+  function setTheme(t) {
+    root.dataset.theme = t;
+    document.querySelectorAll('[data-set-theme]').forEach(b => b.setAttribute('aria-pressed', b.dataset.setTheme === t));
+    try { localStorage.setItem('gm-theme', t); } catch (e) {}
+    requestAnimationFrame(() => { drawHero(true); });
+  }
+  let theme = params.get('theme');
+  if (!theme) { try { theme = localStorage.getItem('gm-theme'); } catch (e) {} }
+  if (!theme) theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  document.querySelectorAll('[data-set-theme]').forEach(b => b.addEventListener('click', () => setTheme(b.dataset.setTheme)));
+
+  /* ---- Language: Spanish if the browser is es-*, else English ---- */
+  const i18n = [...document.querySelectorAll('[data-es]')];
+  i18n.forEach(el => { el.dataset.en = el.innerHTML; });
+  const phs = [...document.querySelectorAll('[data-es-ph]')];
+  phs.forEach(el => { el.dataset.enPh = el.placeholder; });
+  function setLang(l) {
+    root.lang = l;
+    i18n.forEach(el => { el.innerHTML = l === 'es' ? el.dataset.es : el.dataset.en; });
+    phs.forEach(el => { el.placeholder = l === 'es' ? el.dataset.esPh : el.dataset.enPh; });
+    document.querySelectorAll('[data-lang]').forEach(b => b.setAttribute('aria-pressed', b.dataset.lang === l));
+    drawHero(true);
+  }
+  document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => setLang(b.dataset.lang)));
+
+  /* ---- Geometry helpers ---- */
+  function catmull(pts, seg = 24) {
+    const out = [];
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
+      for (let s = 0; s < seg; s++) {
+        const t = s / seg, t2 = t * t, t3 = t2 * t;
+        const f = k => .5 * (2 * p1[k] + (-p0[k] + p2[k]) * t + (2 * p0[k] - 5 * p1[k] + 4 * p2[k] - p3[k]) * t2 + (-p0[k] + 3 * p1[k] - 3 * p2[k] + p3[k]) * t3);
+        out.push([f(0), f(1)]);
+      }
+    }
+    out.push(pts[pts.length - 1]);
+    return out;
+  }
+  function resample(pts, step) {
+    const out = [pts[0]]; let acc = 0;
+    for (let i = 1; i < pts.length; i++) {
+      let [x0, y0] = pts[i - 1]; const [x1, y1] = pts[i];
+      let d = Math.hypot(x1 - x0, y1 - y0);
+      while (acc + d >= step) {
+        const r = (step - acc) / d; x0 += (x1 - x0) * r; y0 += (y1 - y0) * r;
+        out.push([x0, y0]); d = Math.hypot(x1 - x0, y1 - y0); acc = 0;
+      }
+      acc += d;
+    }
+    return out;
+  }
+  const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+  function el(name, attrs, parent) { const e = document.createElementNS(NS, name); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+  function rand(seed) { return () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }; }
+
+  /* contour lines: concentric wobbly loops (the "map") */
+  function contours(g, cx, cy, n, r0, gap, seed) {
+    const R = rand(seed); const a1 = R() * 6, a2 = R() * 6;
+    for (let k = 0; k < n; k++) {
+      const r = r0 + k * gap; let d = '';
+      for (let i = 0; i <= 72; i++) {
+        const a = i / 72 * Math.PI * 2;
+        const rr = r * (1 + .16 * Math.sin(3 * a + a1 + k * .15) + .08 * Math.sin(5 * a + a2));
+        d += (i ? 'L' : 'M') + (cx + rr * Math.cos(a)).toFixed(1) + ' ' + (cy + rr * .72 * Math.sin(a)).toFixed(1);
+      }
+      el('path', { d: d + 'Z', fill: 'none', stroke: 'currentColor', 'stroke-width': k % 4 === 3 ? 1.4 : .8, opacity: k % 4 === 3 ? .14 : .09 }, g);
+    }
+  }
+
+  /* ---- The signature: a trail that becomes a helix ---- */
+  const EVENTS = {
+    en: [['Andes Builders Night', 'Lima · attended'], ['Soroban Bootcamp', 'Bogotá · attended'], ['Hack Pacífico', 'Santiago · won'], ['Stellar Dev Day', 'CDMX · staff'], ['Build Week', 'Buenos Aires · attended'], ['You, today', '7 marks · on-chain']],
+    es: [['Andes Builders Night', 'Lima · asistió'], ['Soroban Bootcamp', 'Bogotá · asistió'], ['Hack Pacífico', 'Santiago · ganó'], ['Stellar Dev Day', 'CDMX · staff'], ['Build Week', 'Buenos Aires · asistió'], ['Tú, hoy', '7 huellas · en Stellar']]
+  };
+  const runs = new Map();
+  function buildTrail(svg, opts) {
+    const W = svg.clientWidth, H = svg.clientHeight; if (!W || !H) return;
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.innerHTML = '';
+    svg.style.color = 'var(--text)';
+    const cg = el('g', {}, svg);
+    (opts.contours || []).forEach(([x, y, n, r0, gap, s]) => contours(cg, x * W, y * H, n, r0, gap, s));
+    const base = resample(catmull(opts.points.map(([x, y]) => [x * W, y * H])), 2.5);
+    const N = base.length, L = N * 2.5, wl = opts.wavelength, Amax = opts.amp;
+    const s1 = [], s2 = [], nor = [];
+    for (let i = 0; i < N; i++) {
+      const a = base[Math.max(0, i - 1)], b = base[Math.min(N - 1, i + 1)];
+      let nx = -(b[1] - a[1]), ny = b[0] - a[0]; const m = Math.hypot(nx, ny) || 1; nx /= m; ny /= m; nor.push([nx, ny]);
+      const u = i / (N - 1), A = Amax * smooth(opts.split[0], opts.split[1], u) * (1 - .25 * smooth(.97, 1, u));
+      const w = Math.sin((i * 2.5) / wl * Math.PI * 2) * A;
+      s1.push([base[i][0] + nx * w, base[i][1] + ny * w]); s2.push([base[i][0] - nx * w, base[i][1] - ny * w]);
+    }
+    const rungG = el('g', { stroke: 'var(--text-3)', 'stroke-width': 1.6, 'stroke-linecap': 'round' }, svg);
+    const rungs = [];
+    const half = wl / 2 / 2.5; // samples per half wave
+    for (let k = 0; k * half < N; k++) for (const f of [.3, .5, .7]) {
+      const i = Math.round((k + f) * half); if (i >= N) continue;
+      const len = Math.hypot(s1[i][0] - s2[i][0], s1[i][1] - s2[i][1]); if (len < 10) continue;
+      const shrink = 5 / len;
+      const x1 = s1[i][0] + (s2[i][0] - s1[i][0]) * shrink, y1 = s1[i][1] + (s2[i][1] - s1[i][1]) * shrink;
+      const x2 = s2[i][0] + (s1[i][0] - s2[i][0]) * shrink, y2 = s2[i][1] + (s1[i][1] - s2[i][1]) * shrink;
+      rungs.push([i, el('line', { x1, y1, x2, y2, opacity: 0 }, rungG)]);
+    }
+    const ink = el('polyline', { fill: 'none', stroke: 'var(--strand)', 'stroke-width': opts.sw * .8, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, svg);
+    const halo = el('polyline', { fill: 'none', stroke: 'var(--bg)', 'stroke-width': opts.sw + 5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, svg);
+    const blz = el('polyline', { fill: 'none', stroke: 'var(--blaze)', 'stroke-width': opts.sw, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, svg);
+    // nodes at strand crossings closest to target positions
+    const nodesG = el('g', {}, svg), nodes = [];
+    const lang = root.lang === 'es' ? 'es' : 'en';
+    opts.nodes.forEach((u, idx) => {
+      let i = Math.round(u * (N - 1));
+      if (u < 1) { const k = Math.round(i / half); i = Math.min(N - 1, Math.max(0, Math.round(k * half))); } else i = N - 1;
+      const [x, y] = base[i]; const last = idx === opts.nodes.length - 1;
+      const state = opts.states[idx];
+      const c = state === 'onchain' ? 'var(--anchored)' : state === 'verified' ? 'var(--signed)' : 'var(--blaze)';
+      const g = el('g', {}, nodesG);
+      if (last) { el('circle', { class: 'hring', cx: x, cy: y, r: 14 }, g); }
+      const ng = el('g', { class: 'hnode' }, g);
+      if (state === 'onchain') el('circle', { cx: x, cy: y, r: last ? 16 : 12, fill: 'none', stroke: c, 'stroke-width': 2 }, ng);
+      el('circle', { cx: x, cy: y, r: last ? 11 : 7.5, fill: last ? 'var(--blaze)' : c, stroke: 'var(--bg)', 'stroke-width': 3 }, ng);
+      if (last) el('circle', { cx: x, cy: y, r: 11, fill: 'none', stroke: '#14121F', 'stroke-width': 2 }, ng);
+      let lab = null;
+      if (opts.labels && opts.labels[idx]) {
+        const [dx, dy, anchor] = opts.labels[idx];
+        lab = el('g', { class: 'hlabel' }, g);
+        const t1 = el('text', { x: x + dx, y: y + dy, 'text-anchor': anchor, class: 'trail-label trail-label--name' }, lab);
+        t1.textContent = EVENTS[lang][idx][0];
+        const t2 = el('text', { x: x + dx, y: y + dy + 16, 'text-anchor': anchor, class: 'trail-label' }, lab);
+        t2.textContent = EVENTS[lang][idx][1];
+      }
+      nodes.push({ i, ng, lab });
+    });
+    const pen = el('circle', { r: opts.sw * 1.3, fill: 'var(--blaze)', style: 'filter: drop-shadow(0 0 6px var(--blaze))' }, svg);
+    const pts = a => a.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+    function frame(p) {
+      const n = Math.max(2, Math.round(p * N));
+      ink.setAttribute('points', pts(s2.slice(0, n)));
+      halo.setAttribute('points', pts(s1.slice(0, n)));
+      blz.setAttribute('points', pts(s1.slice(0, n)));
+      rungs.forEach(([i, l]) => l.setAttribute('opacity', i < n ? .55 : 0));
+      nodes.forEach(nd => { const on = nd.i <= n - 1; nd.ng.classList.toggle('on', on); nd.lab && nd.lab.classList.toggle('on', on); });
+      const tip = s1[n - 1]; pen.setAttribute('cx', tip[0]); pen.setAttribute('cy', tip[1]); pen.setAttribute('opacity', p >= 1 ? 0 : 1);
+    }
+    const prev = runs.get(svg); if (prev) cancelAnimationFrame(prev);
+    if (reduce || opts.instant) { frame(1); return; }
+    const t0 = performance.now(), D = opts.duration;
+    const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    const tick = now => { const t = Math.min(1, (now - t0) / D); frame(ease(t)); if (t < 1) runs.set(svg, requestAnimationFrame(tick)); };
+    runs.set(svg, requestAnimationFrame(tick));
+  }
+
+  const heroSvg = document.getElementById('hero-svg');
+  const miniSvg = document.getElementById('mini-hero');
+  function drawHero(instant) {
+    const wide = innerWidth >= 1024;
+    buildTrail(heroSvg, wide ? {
+      points: [[-.02, .95], [.14, .92], [.3, .96], [.46, .9], [.6, .93], [.7, .8], [.66, .62], [.74, .5], [.86, .5], [.9, .36], [.84, .26], [.93, .18]],
+      wavelength: 110, amp: 26, sw: 4.5, split: [.12, .62], duration: 4600, instant,
+      nodes: [.08, .26, .45, .6, .8, 1], states: ['verified', 'onchain', 'onchain', 'onchain', 'verified', 'you'],
+      labels: [[0, -24, 'middle'], [-14, -26, 'end'], [0, 34, 'middle'], [-44, 4, 'end'], [-16, -40, 'end'], [-20, -34, 'end']],
+      contours: [[.78, .3, 9, 30, 26, 7], [.2, .95, 7, 40, 30, 3], [.98, .95, 6, 50, 34, 11]]
+    } : {
+      points: [[.06, .96], [.42, .9], [.82, .84], [.88, .7], [.5, .62], [.16, .55], [.2, .38], [.6, .3], [.86, .2], [.9, .06]],
+      wavelength: 72, amp: 15, sw: 3.5, split: [.15, .7], duration: 3800, instant,
+      nodes: [.06, .24, .45, .62, .8, 1], states: ['verified', 'onchain', 'onchain', 'onchain', 'verified', 'you'],
+      labels: [[0, -16, 'start'], [-22, 4, 'end'], [22, -8, 'start'], [0, 0, 'start'], [0, 0, 'start'], [-24, 4, 'end']].map((l, i) => [1, 2, 5].includes(i) ? l : null),
+      contours: [[.7, .35, 7, 24, 22, 5], [.1, .8, 5, 30, 24, 9]]
+    });
+    if (miniSvg) buildTrail(miniSvg, {
+      points: [[.04, .92], [.3, .86], [.5, .66], [.32, .45], [.55, .3], [.8, .26], [.94, .08]],
+      wavelength: 60, amp: 12, sw: 3.2, split: [.1, .6], duration: 3200, instant,
+      nodes: [.08, .3, .55, .78, 1], states: ['verified', 'onchain', 'onchain', 'verified', 'you'],
+      contours: [[.78, .55, 6, 20, 18, 4]]
+    });
+  }
+
+  /* ---- QR (decorative) ---- */
+  const qr = document.getElementById('qr');
+  if (qr) {
+    const R = rand(42); const n = 21;
+    const finder = (r, c) => { for (const [fr, fc] of [[0, 0], [0, 14], [14, 0]]) { const y = r - fr, x = c - fc; if (y >= 0 && y < 7 && x >= 0 && x < 7) return (y === 0 || y === 6 || x === 0 || x === 6 || (y > 1 && y < 5 && x > 1 && x < 5)) ? 1 : 0; } return -1; };
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) { const f = finder(r, c); const on = f === -1 ? R() > .52 : f; const i = document.createElement('i'); if (!on) i.className = 'o'; qr.appendChild(i); }
+  }
+
+  /* ---- Replays ---- */
+  document.getElementById('replay-hero').addEventListener('click', () => drawHero(false));
+  document.getElementById('replay-node').addEventListener('click', () => {
+    const n = document.getElementById('new-node'); n.classList.remove('gm-node--new'); void n.offsetWidth; n.classList.add('gm-node--new');
+  });
+
+  /* ---- Hold to confirm ---- */
+  const hold = document.getElementById('hold-btn'); let h = 0, raf = 0, holding = false;
+  const step = () => { h = Math.min(1, h + (holding ? 1 / 96 : -1 / 30)); h = Math.max(0, h); hold.style.setProperty('--hold', h); if (h >= 1) { hold.dataset.done = ''; holding = false; return; } if ((holding && h < 1) || (!holding && h > 0)) raf = requestAnimationFrame(step); };
+  const start = e => { if (hold.dataset.done !== undefined) return; if (e.type === 'keydown' && !(e.key === ' ' || e.key === 'Enter')) return; e.preventDefault(); if (holding) return; holding = true; cancelAnimationFrame(raf); raf = requestAnimationFrame(step); };
+  const stop = () => { holding = false; cancelAnimationFrame(raf); raf = requestAnimationFrame(step); };
+  hold.addEventListener('pointerdown', start); hold.addEventListener('keydown', start);
+  ['pointerup', 'pointerleave', 'keyup', 'blur'].forEach(ev => hold.addEventListener(ev, stop));
+
+  /* ---- Init ---- */
+  root.dataset.theme = theme;
+  document.querySelectorAll('[data-set-theme]').forEach(b => b.setAttribute('aria-pressed', b.dataset.setTheme === theme));
+  const lang = params.get('lang') || ((navigator.language || 'en').toLowerCase().startsWith('es') ? 'es' : 'en');
+  if (lang === 'es') setLang('es'); else drawHero(params.has('static'));
+  let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => drawHero(true), 150); });
+})();
+</script>
+</body>
+</html>
