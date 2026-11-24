@@ -1,16 +1,22 @@
 <!doctype html>
-<html lang="es-PE">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f5f1e7">
-  <meta name="robots" content="noindex">
-  <title>GenoMap | Piloto</title>
-  <link rel="icon" type="image/svg+xml" href="/assets/mark.svg">
+  <meta name="theme-color" content="#F5F0E6">
+  <title>Genomap</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <script>
+    // Apply the saved theme before first paint so there is no flash.
+    try {
+      var t = localStorage.getItem("gm-theme");
+      if (t === "dark" || t === "light") document.documentElement.dataset.theme = t;
+    } catch (e) {}
+  </script>
 </head>
-<body>
+<body class="gm-base">
   <div id="root"></div>
-  <noscript>Activa JavaScript para usar el piloto de GenoMap. <span lang="en">Enable JavaScript to use the GenoMap pilot.</span></noscript>
+  <noscript>Genomap needs JavaScript. Genomap necesita JavaScript.</noscript>
   <script type="module" src="/src/main.jsx"></script>
 </body>
 </html>
