@@ -1,14 +1,19 @@
-# Attendance commitment registry
+# Genomap trail registry
 
-The platform publisher can store an opaque 32-byte commitment. The contract does not receive learner names, email addresses, wallet addresses, or profile identifiers. A matching commitment shows that the configured publisher anchored it; it does not independently prove that a person attended an event. The application is responsible for organizer authorization and deduplicating the underlying off-chain record.
+A public, legible record of what each builder did, written against their Stellar wallet. The platform admin (the account that deploys the contract, controlled by the moderator) is the only account that can write. It approves organizers and records what each one signed. Anyone can read a wallet's records straight from the contract, without going through Genomap.
+
+On-chain data: wallet, kind of record (`Attendance`, `Winner`, `Staff`, `Speaker`), event id and title, event date (`YYYYMMDD`), organizer id, a hash of the full off-chain record (`commitment`) and the ledger time it was anchored. Names, emails and bios stay off-chain. A record shows that the configured admin anchored it for an approved organizer; it does not independently prove that a person attended.
 
 | Function | Result |
 | --- | --- |
-| Constructor `(publisher: Address)` | Sets the publisher atomically at deployment. |
-| `attest(commitment: BytesN<32>)` | Requires the publisher's authorization. Returns `true` on insertion; authenticated repeats return `false`. |
-| `has_attestation(commitment: BytesN<32>)` | Public lookup. Returns `true` if stored. |
+| Constructor `(admin: Address)` | Sets the admin atomically at deployment. |
+| `set_organizer(organizer_id, name, approved)` | Admin only. Approves or revokes an organizer. Revoking does not erase past records. |
+| `organizer_name(organizer_id)` | Public. The organizer's name if currently approved. |
+| `issue(wallet, organizer_id, kind, event_id, event, event_date, commitment)` | Admin only, for approved organizers. Returns `true` on insertion and `false` if the wallet already has this kind of record for this event. Rejects an unapproved organizer, empty or oversized text, and invalid dates. |
+| `record_count(wallet)` | Public. How many records the wallet has. |
+| `records_of(wallet, start, limit)` | Public. A page of records, oldest first. `limit` is capped at 50. |
 
-Commitments use persistent storage; the publisher uses instance storage. The pilot does not extend ledger TTLs. Before production, plan and fund restoration and TTL management for contract code, instance, and persistent entries. An unavailable or archived lookup must not be reported as a confirmed absence without handling restoration. See the [Stellar state archival guide](https://developers.stellar.org/docs/learn/fundamentals/contract-development/storage/state-archival).
+Entries use persistent storage and their TTL is extended on every write (to about 180 days, refreshed when under 30). Records that are never touched again can still expire: before production, plan and fund TTL extension and restoration for contract code, instance and persistent entries. An unavailable or archived lookup must not be reported as a confirmed absence without handling restoration. See the [Stellar state archival guide](https://developers.stellar.org/docs/learn/fundamentals/contract-development/storage/state-archival).
 
 ## Build and verify locally
 

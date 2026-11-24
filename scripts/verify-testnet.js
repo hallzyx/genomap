@@ -1,7 +1,7 @@
 import { createHash, randomBytes } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
-import { Address, Operation, StrKey } from "@stellar/stellar-sdk";
+import { Address, Keypair, Operation, StrKey } from "@stellar/stellar-sdk";
 import { createStellarAdapter, createTestnetPublisher } from "../server/stellar.js";
 
 const ledger = resolve(".pilot-data/genomap-testnet-verification.json");
@@ -63,17 +63,29 @@ async function main() {
   if (!StrKey.isValidContract(contractId)) throw new Error("Testnet did not return a contract ID.");
   state.contractId = contractId;
   const commitment = randomBytes(32).toString("hex");
+  const wallet = Keypair.random().publicKey();
   state.commitment = commitment;
+  state.syntheticWallet = wallet;
   await save();
 
-  step = "anchor the synthetic commitment";
   const chain = createStellarAdapter({ network: "testnet", issuerAlias: alias, contractId }, { resolveAlias: async () => address });
-  await chain.attest(commitment, async (hash) => {
+  step = "approve a synthetic organizer";
+  const organizerId = randomBytes(32).toString("hex");
+  await chain.registerOrganizer({ organizerId, name: "Genomap verification" }, async (hash) => {
+    state.organizerHash = hash;
+    await save();
+  });
+  step = "write a synthetic record";
+  await chain.issue({
+    wallet, organizerId, kind: "attendance", eventId: randomBytes(32).toString("hex"),
+    eventTitle: "Genomap verification", eventDate: new Date().toISOString().slice(0, 10), commitment,
+  }, async (hash) => {
     state.anchorHash = hash;
     await save();
   });
-  step = "verify the commitment on Testnet";
-  if (!await chain.hasAttestation(commitment)) throw new Error("The commitment was not found on Testnet.");
+  step = "read the record back from Testnet";
+  const records = await chain.recordsOf(wallet);
+  if (!records.some((record) => record.commitment === commitment)) throw new Error("The record was not found on Testnet.");
   state.status = "verified";
   await save();
   console.log(JSON.stringify(state, null, 2));
