@@ -101,7 +101,8 @@ export const copy = {
       tag: "For recruiters and agents", title: "Validate 1 builder or 10,000. From your code or your agent.",
       lead: "Every public trail is one plain JSON call. No keys needed for the free public lookup. Agents get the same trust labels people see.",
       f1: "REST and JSON", f1d: "One GET per person. Username or wallet.", f2: "Public data only", f2d: "Only profiles their owners made public.", f3: "Check on-chain", f3d: "Add /verify to compare with the Stellar network.",
-      example: "Look someone up", response: "What you get back", enterprise: "Need a bulk feed, webhooks or an MCP connection to your agent? Write to us and we'll set it up with you.",
+      example: "Look someone up", response: "What you get back", mcp: "Connect your agent (MCP)", mcpD: "A read-only MCP server with two tools: validate_builder reads a public trail, verify_builder compares it with Stellar.",
+      enterprise: "Need a bulk feed or webhooks? Write to us and we'll set it up with you.",
     },
     glossary: {
       tag: "Glossary", title: "Odd words, explained in human.",
@@ -239,7 +240,8 @@ export const copy = {
       tag: "Para reclutadores y agentes", title: "Valida a 1 o a 10.000 builders. Desde tu código o tu agente.",
       lead: "Cada rastro público es una llamada JSON simple. No hace falta clave para la consulta pública gratuita. Los agentes reciben las mismas etiquetas de confianza que ven las personas.",
       f1: "REST y JSON", f1d: "Un GET por persona. Usuario o wallet.", f2: "Solo datos públicos", f2d: "Solo perfiles que sus dueños hicieron públicos.", f3: "Comprueba en Stellar", f3d: "Agrega /verify para comparar con la red Stellar.",
-      example: "Consulta a alguien", response: "Lo que recibes", enterprise: "¿Necesitas un feed masivo, webhooks o una conexión MCP con tu agente? Escríbenos y lo armamos contigo.",
+      example: "Consulta a alguien", response: "Lo que recibes", mcp: "Conecta tu agente (MCP)", mcpD: "Un servidor MCP de solo lectura con dos herramientas: validate_builder lee un rastro público y verify_builder lo compara con Stellar.",
+      enterprise: "¿Necesitas un feed masivo o webhooks? Escríbenos y lo armamos contigo.",
     },
     glossary: {
       tag: "Glosario", title: "Palabras raras, explicadas en humano.",

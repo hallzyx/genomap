@@ -80,6 +80,37 @@ No key is needed for the public lookup. Only profiles whose owners turned on the
 
 `status` is `confirmed` when the mark is anchored on Stellar and `unanchored` when it is signed and stored only in Genomap.
 
+## MCP server for agents
+
+A read-only [MCP](https://modelcontextprotocol.io) server lets an AI agent validate builders. It only calls the public API above, so it can only see public profiles and can never write anything.
+
+| Tool | What it does |
+| --- | --- |
+| `validate_builder` | Looks up a username or wallet and returns the name, anchor wallet, a summary and the marks. |
+| `verify_builder` | Compares the marks with the Stellar contract and returns a verdict: `match`, `mismatch`, `nothing_anchored` or `no_wallet`. Makes a live network call. |
+
+```powershell
+# stdio, for agent hosts that launch the server themselves (Claude Desktop, IDEs, ...)
+$env:GENOMAP_URL = 'http://127.0.0.1:4173'; npm.cmd run mcp
+
+# HTTP service (Streamable HTTP at /mcp, health check at /health), for Docker Compose or a separate host
+$env:GENOMAP_URL = 'http://127.0.0.1:4173'; node mcp/index.js --http
+```
+
+| Variable | Setting |
+| --- | --- |
+| `GENOMAP_URL` | The Genomap app to read from. Default `http://127.0.0.1:4173`. |
+| `GENOMAP_MCP_HOST` | HTTP bind address. Default `127.0.0.1`; use `0.0.0.0` inside a container. |
+| `GENOMAP_MCP_PORT` | HTTP port. Default `4174`. |
+
+Agent host configuration (stdio), using the absolute path of this repository:
+
+```json
+{ "mcpServers": { "genomap": { "command": "node", "args": ["/path/to/genomap/mcp/index.js"], "env": { "GENOMAP_URL": "https://genomap.example.com" } } } }
+```
+
+The HTTP service has no authentication of its own: keep it on a private network or behind your reverse proxy. Like the REST API, `verify_builder` calls Stellar on every request, so rate-limit it before exposing it to the public Internet. Avoid ports blocked by `fetch` (for example 4190) for the Genomap app.
+
 ## Build the contract natively on Windows
 
 With Rust, Stellar CLI, and the `wasm32v1-none` Rust target installed, run from `contracts/attendance`:

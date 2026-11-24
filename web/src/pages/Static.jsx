@@ -55,6 +55,9 @@ export function Developers() {
         <pre className="gm-code"><span className="c"># {t("dev.example")}</span>{`\ncurl ${origin}/api/validate/valeria\n\n`}<span className="c"># {t("verify.stellar")}</span>{`\ncurl ${origin}/api/validate/valeria/verify`}</pre>
         <span className="gm-label">{t("dev.response")}</span>
         <pre className="gm-code">{SAMPLE}</pre>
+        <span className="gm-label">{t("dev.mcp")}</span>
+        <p className="gm-small">{t("dev.mcpD")}</p>
+        <pre className="gm-code">{JSON.stringify({ mcpServers: { genomap: { command: "node", args: ["/path/to/genomap/mcp/index.js"], env: { GENOMAP_URL: origin } } } }, null, 2)}</pre>
       </section>
     </div>
   </Page>;
