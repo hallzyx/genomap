@@ -179,7 +179,20 @@ Every record shows map coordinates in mono (`−33.4489, −70.6693 · SANTIAGO 
 
 - **Base viewport is 390 px.** Gutter is 16 px (`--gutter`), 32 px from 768 px up, and 48 px from 1280 px up. Container max width is 72rem.
 - One column on phones. Two-column card grids from 768 px; three-column screen galleries and side navigation from 1024 px.
-- **Spacing:** 4 px base (`--sp-1` … `--sp-24`).
+- **Spacing:** 4 px base (`--sp-1` … `--sp-24`) for spacing *inside* components.
+- **Layout rhythm tokens** for spacing *between* things (added in the UX pass, because ad-hoc 12 px gaps everywhere made screens cramped):
+
+  | Token | Value | Use |
+  |---|---|---|
+  | `--space-section` | 40 → 64 px (fluid) | Between page sections (header ↔ form ↔ list) |
+  | `--space-block` | 24 → 32 px (fluid) | Between cards or blocks inside a section |
+  | `--space-item` | 16 px | Between items in a list (records, events) |
+  | `--space-tight` | 8 px | Kicker ↔ heading, label ↔ value |
+  | `--card-pad` | 20 → 28 px (fluid) | Padding inside every `.gm-card` |
+  | `--content-narrow` | 40rem | Forms, settings, single-task views |
+
+  Rule of thumb: an element never touches its neighbor. If two things are related, use `--space-tight` or the `--sp-*` scale; if they're separate jobs, put `--space-section` between them.
+- **One job per view.** The signed-in app is split into tabs, so no screen mixes organizer tools with personal setup (see §8, "App structure").
 - **Radii:** buttons and inputs 14 px, cards 22 px, sheets and phones 32 px, pills fully round. Corners are soft, but buttons keep a hard **stamp** edge.
 - **Elevation:** cards sit on paper with a hairline and a soft warm shadow. **Buttons are stamped:** a 3 px hard ink offset that collapses when pressed, as if the button were pressed into the page.
 - **Texture:** `.gm-topo` adds faint topographic contours (CSS mask tinted by `--contour`) to heroes and special surfaces only, never behind dense text.
@@ -202,7 +215,7 @@ Every record shows map coordinates in mono (`−33.4489, −70.6693 · SANTIAGO 
 | Toast, banner | `.gm-toast(--onchain/--failed)`, `.gm-banner--failed/--pending/--onchain` | The on-chain banner uses the double edge. |
 | Empty state | `.gm-empty` (+ `__art`) | Dashed path that leads off toward a future node. |
 | Glossary | `.gm-gloss > .gm-gloss__term + .gm-gloss__tip` | Opens on hover and on keyboard focus (`:focus-within`); `.is-open` forces it open. |
-| Trail | `.gm-node` (+ state modifiers, `--new`, `--lg`, `--future`), `.gm-trail` (helix spine), `.gm-trail--unwound`, `.gm-minitrail` | The spine is two masked sine strands, colored by tokens. |
+| Trail | `.gm-node` (+ state modifiers, `--new`, `--lg`, `--future`), `.gm-trail` (helix spine), `.gm-trail--unwound`, `.gm-minitrail` | The spine is an SVG measured from the real node positions (`TrailList` in `web/src/marks.jsx`; a vanilla copy lives in `preview.html`). Between two nodes it draws a whole number of half-waves (~34 px each), so **the strands cross exactly on every node**. It starts on the first node and ends on the last, with faint base-pair rungs at each peak. Geometry: list inset 48 px, spine center x = 18 px, node top 22 px (lined up with the card's first row). A single mark shows only its node. |
 | Ceremony | `.gm-ceremony`, `.gm-knot`, `.gm-wallet-card`, `.gm-permanent` | |
 | Validator | `.gm-reveal` | A scan line sweeps down and the result rises in. |
 | Data | `.gm-rows/.gm-row`, `.gm-compare`, `.gm-tick--ok/--wait/--miss`, `.gm-code` | |
@@ -222,6 +235,24 @@ Every record shows map coordinates in mono (`−33.4489, −70.6693 · SANTIAGO 
 ## 8. Screen-by-screen spec
 
 Every screen is mocked in `preview.html` (390 px phones; organizer dashboard and API page at desktop width). EN/ES text for each is in the file under `data-es`.
+
+### App structure (built app, `web/src`)
+The signed-in area used to be one long page that stacked organizer tools on top of the builder dashboard. It's now a frame with a role pill, a sign-out button and **tabs**, and each tab has one primary action:
+
+| Role | Tab → route | One job |
+|---|---|---|
+| Builder | My trail → `/app` | See your marks; finish setup one step at a time (username, then the wallet ceremony); "Check against Stellar" |
+| Builder | My code → `/app/code` | Show the QR and code at an event (big, copyable) |
+| Builder | Account → `/app/settings` | Public identity and link, anchor wallet, public-profile switch, become an organizer |
+| Organizer | Check-in → `/app` | Pick the event, type the code, choose the role, **Sign mark**; marks signed at this event listed beside the form |
+| Organizer | Events → `/app/events` | Totals, list of events ("Open check-in"), new-event form |
+| Organizer | My trail → `/app/trail` | Their own builder trail and setup (their code is one button away at `/app/code`) |
+| Organizer | Account → `/app/settings` | Same as builder, without the organizer request |
+| Moderator | `/app` | Requests queue only |
+
+- The event "open in check-in" is remembered between Events and Check-in (`localStorage: gm-event`).
+- Signing a mark confirms **inside the check-in card** (a status banner) instead of a floating toast that covered content.
+- Below 52rem the header nav folds into a **Menu** (and below 36rem the language and theme switches move into it too), so Validate, For recruiters and Glossary stay reachable on phones.
 
 | Screen | Layout | Key microcopy (EN / ES) |
 |---|---|---|

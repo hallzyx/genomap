@@ -8,9 +8,11 @@ export function Glossary() {
   const { t, raw } = useI18n();
   const terms = Object.entries(raw("glossary.terms"));
   return <Page narrow>
-    <section className="stack">
-      <span className="gm-label">{t("glossary.tag")}</span>
-      <h1 className="gm-h1" style={{ fontSize: "var(--fs-2xl)" }}>{t("glossary.title")}</h1>
+    <section className="view">
+      <header className="view-head"><div className="view-head__text">
+        <span className="gm-label">{t("glossary.tag")}</span>
+        <h1 className="gm-h1 view-title">{t("glossary.title")}</h1>
+      </div></header>
       <dl className="gloss-list">
         {terms.map(([key, [name, definition]]) => <div key={key} id={key}><dt>{name}</dt><dd>{definition}</dd></div>)}
       </dl>
@@ -40,25 +42,33 @@ export function Developers() {
   const origin = location.origin;
   return <Page>
     <div className="api">
-      <section className="stack">
-        <span className="gm-label">{t("dev.tag")}</span>
-        <h1 className="gm-h1" style={{ fontSize: "var(--fs-2xl)" }}>{t("dev.title")}</h1>
+      <section className="api__intro card-stack">
+        <div className="stack stack--tight">
+          <span className="gm-label">{t("dev.tag")}</span>
+          <h1 className="gm-h1 view-title">{t("dev.title")}</h1>
+        </div>
         <p className="gm-lede" style={{ maxWidth: "52ch" }}>{t("dev.lead")}</p>
-        <ul className="facts">
+        <ul className="facts facts--roomy">
           {["f1", "f2", "f3"].map((key) => <li key={key}><span className="gm-node gm-node--onchain" /><span><b>{t(`dev.${key}`)}</b> · {t(`dev.${key}d`)}</span></li>)}
         </ul>
-        <p className="gm-small">{t("dev.enterprise")}</p>
         <Link className="gm-btn gm-btn--primary" to="/validate" style={{ justifySelf: "start" }}>{t("hero.validate")} <Icon name="arrow" className="icon gm-btn__arrow" /></Link>
+        <p className="gm-small">{t("dev.enterprise")}</p>
       </section>
-      <section className="stack">
-        <span className="gm-label">{t("dev.example")}</span>
-        <pre className="gm-code"><span className="c"># {t("dev.example")}</span>{`\ncurl ${origin}/api/validate/valeria\n\n`}<span className="c"># {t("verify.stellar")}</span>{`\ncurl ${origin}/api/validate/valeria/verify`}</pre>
-        <span className="gm-label">{t("dev.response")}</span>
-        <pre className="gm-code">{SAMPLE}</pre>
-        <span className="gm-label">{t("dev.mcp")}</span>
-        <p className="gm-small">{t("dev.mcpD")}</p>
-        <pre className="gm-code">{JSON.stringify({ mcpServers: { genomap: { command: "node", args: ["/path/to/genomap/mcp/index.js"], env: { GENOMAP_URL: origin } } } }, null, 2)}</pre>
-      </section>
+      <div className="api__code">
+        <section className="code-group" aria-labelledby="dev-ex">
+          <h2 id="dev-ex" className="gm-label">{t("dev.example")}</h2>
+          <pre className="gm-code" tabIndex={0}><span className="c"># {t("dev.example")}</span>{`\ncurl ${origin}/api/validate/valeria\n\n`}<span className="c"># {t("verify.stellar")}</span>{`\ncurl ${origin}/api/validate/valeria/verify`}</pre>
+        </section>
+        <section className="code-group" aria-labelledby="dev-res">
+          <h2 id="dev-res" className="gm-label">{t("dev.response")}</h2>
+          <pre className="gm-code" tabIndex={0}>{SAMPLE}</pre>
+        </section>
+        <section className="code-group" aria-labelledby="dev-mcp">
+          <h2 id="dev-mcp" className="gm-label">{t("dev.mcp")}</h2>
+          <p className="gm-small">{t("dev.mcpD")}</p>
+          <pre className="gm-code" tabIndex={0}>{JSON.stringify({ mcpServers: { genomap: { command: "node", args: ["/path/to/genomap/mcp/index.js"], env: { GENOMAP_URL: origin } } } }, null, 2)}</pre>
+        </section>
+      </div>
     </div>
   </Page>;
 }
@@ -73,7 +83,11 @@ export function NotFound() {
       </svg>
       <span className="gm-label">404 · {t("notFound.lead")}</span>
       <h1 className="gm-h2" style={{ fontSize: "var(--fs-xl)" }}>{t("notFound.title")}</h1>
-      <Link className="gm-btn gm-btn--primary" to="/">{t("notFound.home")}</Link>
+      <p>{t("notFound.d")}</p>
+      <div className="row notfound__actions">
+        <Link className="gm-btn gm-btn--primary" to="/">{t("notFound.home")}</Link>
+        <Link className="gm-btn gm-btn--ghost" to="/validate">{t("hero.validate")}</Link>
+      </div>
     </section>
   </Page>;
 }

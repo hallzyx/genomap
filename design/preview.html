@@ -992,6 +992,29 @@
   hold.addEventListener('pointerdown', start); hold.addEventListener('keydown', start);
   ['pointerup', 'pointerleave', 'keyup', 'blur'].forEach(ev => hold.addEventListener(ev, stop));
 
+  /* ---- Helix spine for .gm-trail lists (same geometry as web/src/marks.jsx) ---- */
+  function spine(list) {
+    let wrap = list.parentElement;
+    if (!wrap.classList.contains('gm-trail-wrap')) { wrap = document.createElement('div'); wrap.className = 'gm-trail-wrap'; list.before(wrap); wrap.appendChild(list); }
+    const draw = () => {
+      wrap.querySelector('.gm-trail__spine')?.remove();
+      const ys = [...list.querySelectorAll(':scope > li > .gm-node')].map(n => n.offsetTop + n.parentElement.offsetTop + n.offsetHeight / 2);
+      if (ys.length < 2) return;
+      const X = 18, A = 8; let a = '', b = '', sign = 1; const svg = el('svg', { class: 'gm-trail__spine', width: 36, height: list.offsetHeight, 'aria-hidden': 'true' });
+      const rg = el('g', { class: 'gm-trail__rungs' }, svg);
+      for (let i = 0; i < ys.length - 1; i++) {
+        const y0 = ys[i], span = ys[i + 1] - y0, n = Math.max(2, Math.round(span / 34)), steps = Math.max(12, Math.round(span / 3));
+        for (let s = 0; s <= steps; s++) { const t = s / steps, y = (y0 + span * t).toFixed(1), w = sign * A * Math.sin(Math.PI * n * t); a += (a ? 'L' : 'M') + (X + w).toFixed(1) + ' ' + y; b += (b ? 'L' : 'M') + (X - w).toFixed(1) + ' ' + y; }
+        for (let k = 0; k < n; k++) { const y = y0 + span * (k + .5) / n; el('line', { x1: X - A + 3, x2: X + A - 3, y1: y, y2: y }, rg); }
+        sign *= n % 2 ? -1 : 1;
+      }
+      el('path', { class: 'gm-trail__ink', d: b }, svg); el('path', { class: 'gm-trail__blaze', d: a }, svg);
+      wrap.appendChild(svg);
+    };
+    draw(); new ResizeObserver(draw).observe(list);
+  }
+  document.querySelectorAll('.gm-trail').forEach(spine);
+
   /* ---- Init ---- */
   root.dataset.theme = theme;
   document.querySelectorAll('[data-set-theme]').forEach(b => b.setAttribute('aria-pressed', b.dataset.setTheme === theme));

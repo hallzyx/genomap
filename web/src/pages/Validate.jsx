@@ -86,9 +86,17 @@ export function Profile({ query, token }) {
   if (loading) return <Page narrow><div className="stack" role="status" aria-label={t("validate.loading")}>
     <div className="gm-skel" style={{ height: 72 }} /><div className="gm-skel" style={{ height: 160 }} /></div></Page>;
   if (error) return <Page narrow>
-    <div className="stack">
-      {error === "profile_missing" ? <div className="gm-empty"><h3>{t("validate.title")}</h3><p>{t("validate.notFound", { q: query ?? "" })}</p></div> : <ErrorNote code={error} />}
-      <SearchBar initial={query ?? ""} />
+    <div className="view-stack">
+      {error === "profile_missing" ? <div className="gm-empty">
+        <svg className="gm-empty__art" viewBox="0 0 120 90" fill="none" aria-hidden="true">
+          <path d="M6 76c26 0 24-30 50-30" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+          <path d="M66 46c20 0 22-26 40-30" stroke="currentColor" strokeWidth="3" strokeDasharray="2 8" strokeLinecap="round" />
+        </svg>
+        <h1 className="gm-h3">{t("validate.noTrail")}</h1><p>{t("validate.notFound", { q: query ?? "" })}</p></div> : <ErrorNote code={error} />}
+      <div className="stack">
+        <span className="gm-label">{t("validate.again")}</span>
+        <SearchBar initial={query ?? ""} />
+      </div>
     </div>
   </Page>;
 
@@ -104,26 +112,28 @@ export function Profile({ query, token }) {
           {data.username ? <span className="gm-mono gm-small">@{data.username}</span> : null}
         </div>
       </div>
-      <div className="stack" style={{ gap: 4 }}>
+      <div className="profile__section stack stack--tight">
         <span className="gm-label">{t("validate.wallet")}</span>
         {data.wallet ? <div className="row">
           <a className="gm-addr gm-link" href={explorer(network, "account", data.wallet)} target="_blank" rel="noreferrer noopener" title={data.wallet}>{shortAddress(data.wallet)}</a>
           <span className="gm-pill gm-pill--onchain"><span className="gm-pill__glyph"><Icon name="lock" className="" /></span>{t("home.walletLinked")}</span>
         </div> : <span className="gm-small">{t("validate.noWallet")}</span>}
       </div>
-      {marks.length ? <div className="stack"><MiniTrail marks={marks} /><Facts marks={marks} />
-        <div className="row"><Pill state={confirmed ? "onchain" : "verified"}>{`${confirmed} / ${marks.length} · ${t("mark.onchain")}`}</Pill></div></div> : <p className="gm-body">{t("validate.noMarks")}</p>}
-      <div className="stack">
+      {marks.length ? <div className="profile__section card-stack">
+        <div className="section-head"><span className="gm-label">{t("validate.summary")}</span>
+          <Pill state={confirmed ? "onchain" : "verified"}>{`${confirmed} / ${marks.length} · ${t("mark.onchain")}`}</Pill></div>
+        <MiniTrail marks={marks} /><Facts marks={marks} /></div> : <p className="gm-body profile__section">{t("validate.noMarks")}</p>}
+      <div className="profile__section stack">
         {verify.report || verify.error ? <VerifyReport {...verify} marks={marks} onAgain={check} /> :
           <button type="button" className="gm-btn gm-btn--secondary" onClick={check} disabled={verify.busy || !data.wallet}>
             <Icon name="refresh" />{verify.busy ? t("verify.checking") : t("validate.check")}</button>}
       </div>
     </article>
-    {marks.length ? <section className="stack" aria-labelledby="vt">
+    {marks.length ? <section className="view-section" aria-labelledby="vt">
       <h2 id="vt" className="gm-h3">{t("validate.trail")}</h2>
       <TrailList marks={marks} network={network} />
     </section> : null}
-    <div className="row">
+    <div className="row profile__foot">
       <button type="button" className="gm-btn gm-btn--ghost gm-btn--sm" onClick={() => copy(location.href)}><Icon name="share" />{copied ? t("validate.sharedCopied") : t("validate.share")}</button>
       <Link className="gm-link gm-small" to="/validate">← {t("nav.validate")}</Link>
     </div>

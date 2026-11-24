@@ -2,7 +2,7 @@
 // informal "tú", neutral Latin American. Plain words first; technical words live in the glossary.
 export const copy = {
   en: {
-    nav: { validate: "Validate", glossary: "Glossary", developers: "For recruiters", signin: "Sign in", join: "Start your trail", app: "My trail", signout: "Sign out", language: "Language", theme: "Theme", light: "Light", dark: "Dark", skip: "Skip to content" },
+    nav: { validate: "Validate", glossary: "Glossary", developers: "For recruiters", signin: "Sign in", join: "Start your trail", app: "My space", signout: "Sign out", language: "Language", theme: "Theme", light: "Light", dark: "Dark", skip: "Skip to content", menu: "Menu" },
     hero: {
       eyebrow: "For people building on Stellar", a: "Your path is", b: "your proof.",
       lede: "Every hackathon you attend, win or help run leaves a mark. Genomap weaves those marks into a verified trail: signed by the organizer, anchored on Stellar, yours for life.",
@@ -50,6 +50,14 @@ export const copy = {
       verify: "Check against Stellar", verifyD: "Compare what Genomap shows with what the Stellar network holds.", verifyRun: "Check now", verifyNeedsWallet: "Link a wallet first.",
       organizer: "Become an organizer", organizerD: "Run events? Ask to sign the marks of your community.", organizerCta: "Ask to become an organizer",
       pending: "Request received", pendingD: "We review every request by hand and will write to you by email.",
+      inReview: "In review", setupLead: "Two quick steps, then your first event. You only do this once.", stepOf: "Step {n} of {total}",
+      trailSoon: "Your marks will show up here after setup.",
+      codeTitle: "Your check-in code", codeLead: "Show this at every event. The organizer scans the QR or types the code to give you a mark.", codeSame: "It's the same code at every event.",
+      codeNoWallet: "Link your anchor wallet so your marks can be written on Stellar.", codeNoWalletCta: "Link my wallet", codeShow: "Show my check-in code",
+      account: "Your account", accountLead: "Your public name, your anchor wallet and who can see your trail.",
+      identity: "Public identity", publicLink: "Your public link", noUsername: "You haven't picked a username yet.", finishSetup: "Finish setup",
+      walletNone: "No wallet linked yet.", walletForever: "This wallet can't be changed or removed. That's what keeps your trail yours.",
+      verifyLead: "Compare your trail with what the Stellar network holds.",
     },
     ceremony: {
       title: "This wallet becomes your anchor. For good.",
@@ -65,11 +73,11 @@ export const copy = {
     mark: {
       attendance: "Attended", winner: "Won", staff: "Staff", speaker: "Speaker",
       onchain: "On-chain", verified: "Verified", pending: "Anchoring…", failed: "Didn't anchor",
-      by: "Signed by {org}", tx: "View on Stellar", anchor: "Anchor on Stellar", retry: "Retry", needsWallet: "This person hasn't linked a wallet yet.",
+      by: "Signed by {org}", tx: "View on Stellar", anchor: "Anchor on Stellar", retry: "Retry", needsWallet: "Signed and safe in Genomap. It can go on Stellar once this person links a wallet.",
       failedD: "This mark hasn't reached Stellar yet. Your record is safe in Genomap. Try again in a moment.",
     },
     verify: {
-      title: "What Genomap says vs. what Stellar says.", genomap: "Genomap", stellar: "Stellar",
+      title: "What Genomap says vs. what Stellar says.", colMark: "Mark", genomap: "Genomap", stellar: "Stellar",
       match: "Matches the Stellar network", matchD: "{ok} of {total} marks checked on-chain · {when}", justNow: "just now",
       mismatch: "Doesn't match Stellar", mismatchD: "{n} mark(s) in Genomap aren't on the network. Stellar wins: a profile only counts what checks out.",
       local: "Not anchored yet", again: "Check again", checking: "Asking Stellar…", missing: "Not on Stellar", onlyChain: "{n} mark(s) on Stellar aren't in Genomap.",
@@ -81,6 +89,10 @@ export const copy = {
       issue: "Sign mark", issued: "Marks you signed", noIssued: "Nothing signed yet.", kpiIssued: "Signed", kpiChain: "On-chain", kpiWaiting: "Waiting",
       anchorAll: "Anchor all waiting", signedOk: "Signed. {name} has a new mark.", approvedNote: "You're approved. Marks you sign are anchored on Stellar.",
       pickFirst: "Pick or create an event first.",
+      eventLabel: "Event", manage: "Manage events", forEvent: "Signed at this event", signedD: "The new mark is at the top of the list below.",
+      noEventsTitle: "Create your first event", noEventsD: "Every mark belongs to an event. Create one, then come back here to sign marks.", goEvents: "Create an event",
+      eventsLead: "Create an event, then open its check-in to sign marks.", open: "Open check-in", goCheckin: "Go to check-in", current: "Open in check-in",
+      marksCount: { one: "{n} mark", other: "{n} marks" }, created: "Event created. It's now open in check-in.",
     },
     request: {
       title: "Sign the marks of your community.", lead: "Tell us who you are. We review every organizer by hand, outside the app, and write to you by email.",
@@ -88,11 +100,11 @@ export const copy = {
     },
     mod: {
       title: "Organizer requests", count: { one: "{n} organizer waiting.", other: "{n} organizers waiting." }, none: "No requests waiting. All caught up.",
-      verified: "I verified this organizer outside the app", approve: "Approve", person: "Requested by", when: "Requested", link: "Link", note: "Their note",
+      noneD: "New organizer requests will show up here. Approve only after you have verified them outside the app.", verified: "I verified this organizer outside the app", approve: "Approve", person: "Requested by", when: "Requested", link: "Link", note: "Their note",
     },
     validate: {
       title: "Who do you want to validate?", lead: "Type a username or paste a wallet address (it starts with G). Only profiles their owners made public can be found.",
-      placeholder: "@username or G…", go: "Validate", notFound: "No trail found for “{q}”. Check the spelling, or paste their wallet address (it starts with G).",
+      placeholder: "@username or G…", go: "Validate", noTrail: "No public trail here", again: "Try another search", notFound: "No trail found for “{q}”. Check the spelling, or paste their wallet address (it starts with G).",
       loading: "Looking for that trail…", wallet: "Anchor wallet", noWallet: "No wallet linked yet", trail: "Verified trail", summary: "At a glance",
       facts: { attendance: { one: "Attended {n} event", other: "Attended {n} events" }, winner: { one: "Won {n} hackathon", other: "Won {n} hackathons" }, staff: { one: "Helped run {n} event", other: "Helped run {n} events" }, speaker: { one: "Spoke at {n} event", other: "Spoke at {n} events" } },
       noMarks: "This person hasn't collected any marks yet.", check: "Check against Stellar", share: "Share this profile", sharedCopied: "Link copied",
@@ -123,7 +135,7 @@ export const copy = {
         organizer: ["Organizer", "Someone we approved by hand who can sign marks for the events they run."],
       },
     },
-    notFound: { title: "This path doesn't lead anywhere. Yet.", lead: "Edge of the map.", home: "Back to the start" },
+    notFound: { title: "This path doesn't lead anywhere. Yet.", lead: "Edge of the map.", d: "The link may be mistyped, or the profile may be private.", home: "Back to the start" },
     errors: {
       network: "We couldn't reach Genomap. Your data is safe. Check your connection and try again.", unknown: "Something went wrong. Your data is safe. Try again in a moment.",
       sign_in_required: "Sign in to continue.", role_required: "You don't have permission for this.", invalid_input: "Check what you typed and try again.",
@@ -137,11 +149,11 @@ export const copy = {
       user_already_exists: "An account with that email already exists. Try signing in.", invalid_email_or_password: "Email or password isn't right.", password_too_short: "Use at least 12 characters.",
       freighter_missing: "We couldn't find Freighter. Install it, or use another wallet below.", freighter_rejected: "The wallet request was cancelled. Nothing was linked.",
     },
-    app: { role: { learner: "Builder", organizer: "Organizer", moderator: "Moderator" } },
+    app: { role: { learner: "Builder", organizer: "Organizer", moderator: "Moderator" }, nav: "Your space", tabs: { trail: "My trail", code: "My code", settings: "Account", checkin: "Check-in", events: "Events", requests: "Requests" } },
     common: { loading: "Loading…", retry: "Try again", cancel: "Cancel", back: "Back", close: "Close", ago: "ago", you: "You" },
   },
   es: {
-    nav: { validate: "Validar", glossary: "Glosario", developers: "Para reclutadores", signin: "Entrar", join: "Empieza tu rastro", app: "Mi rastro", signout: "Salir", language: "Idioma", theme: "Tema", light: "Claro", dark: "Oscuro", skip: "Saltar al contenido" },
+    nav: { validate: "Validar", glossary: "Glosario", developers: "Para reclutadores", signin: "Entrar", join: "Empieza tu rastro", app: "Mi espacio", signout: "Salir", language: "Idioma", theme: "Tema", light: "Claro", dark: "Oscuro", skip: "Saltar al contenido", menu: "Menú" },
     hero: {
       eyebrow: "Para quienes construyen en Stellar", a: "Tu camino es", b: "tu prueba.",
       lede: "Cada hackathon al que vas, ganas o ayudas a organizar deja una huella. Genomap la teje en un rastro verificado: firmado por quien organiza, anclado en Stellar, tuyo de por vida.",
@@ -189,6 +201,14 @@ export const copy = {
       verify: "Comprobar en Stellar", verifyD: "Compara lo que muestra Genomap con lo que guarda la red Stellar.", verifyRun: "Comprobar ahora", verifyNeedsWallet: "Primero une una wallet.",
       organizer: "Sé organizador", organizerD: "¿Organizas eventos? Pide firmar las huellas de tu comunidad.", organizerCta: "Pide ser organizador",
       pending: "Solicitud recibida", pendingD: "Revisamos cada solicitud a mano y te escribiremos por correo.",
+      inReview: "En revisión", setupLead: "Dos pasos rápidos y luego tu primer evento. Solo lo haces una vez.", stepOf: "Paso {n} de {total}",
+      trailSoon: "Tus huellas aparecerán aquí cuando termines.",
+      codeTitle: "Tu código de check-in", codeLead: "Muéstralo en cada evento. Quien organiza escanea el QR o escribe el código para darte una huella.", codeSame: "Es el mismo código en todos los eventos.",
+      codeNoWallet: "Une tu wallet ancla para que tus huellas puedan quedar escritas en Stellar.", codeNoWalletCta: "Unir mi wallet", codeShow: "Ver mi código de check-in",
+      account: "Tu cuenta", accountLead: "Tu nombre público, tu wallet ancla y quién puede ver tu rastro.",
+      identity: "Identidad pública", publicLink: "Tu enlace público", noUsername: "Aún no elegiste un usuario.", finishSetup: "Terminar la configuración",
+      walletNone: "Aún no uniste una wallet.", walletForever: "Esta wallet no se puede cambiar ni quitar. Eso mantiene tu rastro como tuyo.",
+      verifyLead: "Compara tu rastro con lo que guarda la red Stellar.",
     },
     ceremony: {
       title: "Esta wallet será tu ancla. Para siempre.",
@@ -204,11 +224,11 @@ export const copy = {
     mark: {
       attendance: "Asistió", winner: "Ganó", staff: "Staff", speaker: "Ponente",
       onchain: "En Stellar", verified: "Verificado", pending: "Anclando…", failed: "No se ancló",
-      by: "Firmado por {org}", tx: "Ver en Stellar", anchor: "Anclar en Stellar", retry: "Reintentar", needsWallet: "Esta persona aún no unió una wallet.",
+      by: "Firmado por {org}", tx: "Ver en Stellar", anchor: "Anclar en Stellar", retry: "Reintentar", needsWallet: "Firmada y a salvo en Genomap. Podrá ir a Stellar cuando esta persona una su wallet.",
       failedD: "Esta huella aún no llegó a Stellar. Tu registro está a salvo en Genomap. Intenta de nuevo en un momento.",
     },
     verify: {
-      title: "Lo que dice Genomap vs. lo que dice Stellar.", genomap: "Genomap", stellar: "Stellar",
+      title: "Lo que dice Genomap vs. lo que dice Stellar.", colMark: "Huella", genomap: "Genomap", stellar: "Stellar",
       match: "Coincide con la red Stellar", matchD: "{ok} de {total} huellas comprobadas en la red · {when}", justNow: "hace un momento",
       mismatch: "No coincide con Stellar", mismatchD: "{n} huella(s) en Genomap no aparecen en la red. Stellar manda: un perfil solo cuenta lo comprobado.",
       local: "Aún sin anclar", again: "Comprobar de nuevo", checking: "Preguntando a Stellar…", missing: "No está en Stellar", onlyChain: "{n} huella(s) en Stellar no están en Genomap.",
@@ -220,6 +240,10 @@ export const copy = {
       issue: "Firmar huella", issued: "Huellas que firmaste", noIssued: "Aún no has firmado nada.", kpiIssued: "Firmadas", kpiChain: "En Stellar", kpiWaiting: "En espera",
       anchorAll: "Anclar todas las que esperan", signedOk: "Firmado. {name} tiene una huella nueva.", approvedNote: "Estás aprobado. Las huellas que firmes se anclan en Stellar.",
       pickFirst: "Primero elige o crea un evento.",
+      eventLabel: "Evento", manage: "Gestionar eventos", forEvent: "Firmadas en este evento", signedD: "La huella nueva está arriba en la lista.",
+      noEventsTitle: "Crea tu primer evento", noEventsD: "Cada huella pertenece a un evento. Crea uno y vuelve aquí para firmar huellas.", goEvents: "Crear un evento",
+      eventsLead: "Crea un evento y abre su check-in para firmar huellas.", open: "Abrir check-in", goCheckin: "Ir al check-in", current: "Abierto en check-in",
+      marksCount: { one: "{n} huella", other: "{n} huellas" }, created: "Evento creado. Ya está abierto en el check-in.",
     },
     request: {
       title: "Firma las huellas de tu comunidad.", lead: "Cuéntanos quién eres. Revisamos a cada organizador a mano, fuera de la app, y te escribimos por correo.",
@@ -227,11 +251,11 @@ export const copy = {
     },
     mod: {
       title: "Solicitudes de organizadores", count: { one: "{n} organizador espera.", other: "{n} organizadores esperan." }, none: "No hay solicitudes esperando. Todo al día.",
-      verified: "Verifiqué a este organizador fuera de la app", approve: "Aprobar", person: "Solicitada por", when: "Solicitada", link: "Enlace", note: "Su nota",
+      noneD: "Las nuevas solicitudes de organizadores aparecerán aquí. Aprueba solo después de verificarlas fuera de la app.", verified: "Verifiqué a este organizador fuera de la app", approve: "Aprobar", person: "Solicitada por", when: "Solicitada", link: "Enlace", note: "Su nota",
     },
     validate: {
       title: "¿A quién quieres validar?", lead: "Escribe un usuario o pega una dirección de wallet (empieza con G). Solo se encuentran perfiles que sus dueños hicieron públicos.",
-      placeholder: "@usuario o G…", go: "Validar", notFound: "No encontramos un rastro para «{q}». Revisa el usuario, o pega su dirección de wallet (empieza con G).",
+      placeholder: "@usuario o G…", go: "Validar", noTrail: "No hay un rastro público aquí", again: "Prueba otra búsqueda", notFound: "No encontramos un rastro para «{q}». Revisa el usuario, o pega su dirección de wallet (empieza con G).",
       loading: "Buscando ese rastro…", wallet: "Wallet ancla", noWallet: "Aún sin wallet unida", trail: "Rastro verificado", summary: "De un vistazo",
       facts: { attendance: { one: "Asistió a {n} evento", other: "Asistió a {n} eventos" }, winner: { one: "Ganó {n} hackathon", other: "Ganó {n} hackathons" }, staff: { one: "Ayudó a organizar {n} evento", other: "Ayudó a organizar {n} eventos" }, speaker: { one: "Fue ponente en {n} evento", other: "Fue ponente en {n} eventos" } },
       noMarks: "Esta persona aún no reúne huellas.", check: "Comprobar en Stellar", share: "Compartir este perfil", sharedCopied: "Enlace copiado",
@@ -262,7 +286,7 @@ export const copy = {
         organizer: ["Organizador", "Alguien que aprobamos a mano y que puede firmar huellas de los eventos que organiza."],
       },
     },
-    notFound: { title: "Este camino aún no lleva a ningún lado.", lead: "Borde del mapa.", home: "Volver al inicio" },
+    notFound: { title: "Este camino aún no lleva a ningún lado.", lead: "Borde del mapa.", d: "Puede que el enlace esté mal escrito o que el perfil sea privado.", home: "Volver al inicio" },
     errors: {
       network: "No pudimos llegar a Genomap. Tus datos están a salvo. Revisa tu conexión e intenta de nuevo.", unknown: "Algo salió mal. Tus datos están a salvo. Intenta de nuevo en un momento.",
       sign_in_required: "Entra para continuar.", role_required: "No tienes permiso para esto.", invalid_input: "Revisa lo que escribiste e intenta de nuevo.",
@@ -276,7 +300,7 @@ export const copy = {
       user_already_exists: "Ya existe una cuenta con ese correo. Prueba entrando.", invalid_email_or_password: "El correo o la contraseña no son correctos.", password_too_short: "Usa al menos 12 caracteres.",
       freighter_missing: "No encontramos Freighter. Instálalo, o usa otra wallet más abajo.", freighter_rejected: "Se canceló la solicitud de la wallet. No se unió nada.",
     },
-    app: { role: { learner: "Builder", organizer: "Organizador", moderator: "Moderador" } },
+    app: { role: { learner: "Builder", organizer: "Organizador", moderator: "Moderador" }, nav: "Tu espacio", tabs: { trail: "Mi rastro", code: "Mi código", settings: "Cuenta", checkin: "Check-in", events: "Eventos", requests: "Solicitudes" } },
     common: { loading: "Cargando…", retry: "Intentar de nuevo", cancel: "Cancelar", back: "Volver", close: "Cerrar", ago: "", you: "Tú" },
   },
 };

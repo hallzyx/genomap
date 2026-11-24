@@ -34,10 +34,12 @@ export function Auth({ mode }) {
 
   return <Page narrow>
     <section className="auth gm-card gm-card--raised gm-topo">
-      <span className="gm-label">{joining ? "01 / 02" : "Genomap"}</span>
-      <h1 className="gm-h1" style={{ fontSize: "var(--fs-2xl)" }}>{t(joining ? "auth.joinTitle" : "auth.signinTitle")}</h1>
-      <p className="gm-body">{t(joining ? "auth.joinLead" : "auth.signinLead")}</p>
-      <form onSubmit={submit} className="stack">
+      <div className="stack stack--tight">
+        <span className="gm-label">{joining ? "01 / 02" : "Genomap"}</span>
+        <h1 className="gm-h1 view-title">{t(joining ? "auth.joinTitle" : "auth.signinTitle")}</h1>
+        <p className="gm-body">{t(joining ? "auth.joinLead" : "auth.signinLead")}</p>
+      </div>
+      <form onSubmit={submit} className="card-stack">
         {joining ? <label className="gm-field">
           <span className="gm-field__label">{t("auth.name")}</span>
           <input className="gm-input" name="name" required maxLength={80} autoComplete="name" />

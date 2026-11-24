@@ -104,11 +104,11 @@
 .gm-card {
   background: var(--surface); color: var(--text);
   border: 1px solid var(--line); border-radius: var(--r-lg);
-  padding: var(--sp-5); box-shadow: var(--shadow-1);
+  padding: var(--card-pad, var(--sp-5)); box-shadow: var(--shadow-1);
 }
 .gm-card--raised { box-shadow: var(--shadow-2); }
 .gm-card--ink { background: var(--surface-inverse); color: var(--text-inverse); border-color: transparent; }
-.gm-card__head { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); margin-bottom: var(--sp-3); }
+.gm-card__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-3); margin-bottom: var(--sp-4); }
 
 /* Record card: an event "stamp" with map coordinates */
 .gm-record {
@@ -344,22 +344,18 @@
 }
 
 /* ---- Trail path: helix spine for vertical record lists -------------------------
-   Two strands drawn with masked repeating sine waves; colors come from tokens.   */
-.gm-trail { position: relative; list-style: none; margin: 0; padding: 0 0 0 44px; display: grid; gap: var(--sp-4); }
-.gm-trail::before, .gm-trail::after {
-  content: ""; position: absolute; left: 6px; top: 8px; bottom: 8px; width: 26px; pointer-events: none;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 64'%3E%3Cpath d='M13 0C26 16 26 16 13 32S0 48 13 64' fill='none' stroke='%23000' stroke-width='2.6'/%3E%3C/svg%3E") top / 26px 64px repeat-y;
-          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 64'%3E%3Cpath d='M13 0C26 16 26 16 13 32S0 48 13 64' fill='none' stroke='%23000' stroke-width='2.6'/%3E%3C/svg%3E") top / 26px 64px repeat-y;
-}
-.gm-trail::before { background: var(--blaze); }
-.gm-trail::after { background: var(--strand); opacity: .55; transform: scaleX(-1); }
+   The spine is an SVG drawn by TrailList (marks.jsx): two strands that cross exactly
+   on every node, with a whole number of half-waves between nodes. It starts on the
+   first node and ends on the last one. Geometry: spine centre x = 18px, list inset 48px. */
+.gm-trail-wrap { position: relative; }
+.gm-trail { position: relative; z-index: 1; list-style: none; margin: 0; padding: 0 0 0 48px; display: grid; gap: var(--space-item, var(--sp-4)); }
 .gm-trail > li { position: relative; }
-.gm-trail > li > .gm-node { position: absolute; left: -38px; top: 18px; z-index: 1; }
-.gm-trail--unwound::before, .gm-trail--unwound::after { /* before any record: a single dashed path */
-  -webkit-mask: linear-gradient(#000 50%, transparent 0) center / 3px 12px repeat-y;
-          mask: linear-gradient(#000 50%, transparent 0) center / 3px 12px repeat-y;
-  background: var(--line-strong); transform: none; opacity: 1;
-}
+.gm-trail > li > .gm-node { position: absolute; left: calc(18px - 48px - var(--node-size) / 2); top: var(--trail-node-top, 22px); z-index: 1; }
+.gm-trail__spine { position: absolute; z-index: 0; left: 0; top: 0; overflow: visible; pointer-events: none; }
+.gm-trail__spine path { fill: none; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.gm-trail__blaze { stroke: var(--blaze); }
+.gm-trail__ink { stroke: var(--strand); opacity: .5; }
+.gm-trail__rungs line { stroke: var(--line-strong); stroke-width: 1.5; stroke-linecap: round; opacity: .55; }
 
 /* Horizontal mini-trail (profile header, validator result) */
 .gm-minitrail { display: flex; align-items: center; gap: 0; }

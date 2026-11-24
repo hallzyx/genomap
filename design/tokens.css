@@ -83,6 +83,13 @@
   --sp-12: 3rem;   --sp-16: 4rem;   --sp-20: 5rem;   --sp-24: 6rem;
   --gutter: 1rem;                       /* 16px mobile side gutter */
   --container: 72rem;
+  /* Layout rhythm: use these between things, the --sp-* scale inside things */
+  --space-section: clamp(2.5rem, 1.8rem + 2.5vw, 4rem);  /* between page sections */
+  --space-block: clamp(1.5rem, 1.2rem + 1vw, 2rem);      /* between cards / blocks in a section */
+  --space-item: var(--sp-4);                             /* between items in a list */
+  --space-tight: var(--sp-2);                            /* label + value, heading + kicker */
+  --card-pad: clamp(1.25rem, 1rem + 1vw, 1.75rem);       /* inside cards */
+  --content-narrow: 40rem;                               /* forms, settings, reading width */
 
   /* ---- Radii ------------------------------------------------------------ */
   --r-xs: 6px;
