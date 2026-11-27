@@ -34,6 +34,12 @@ export function readConfig(env = process.env) {
     const file = lstatSync(databasePath, { throwIfNoEntry: false });
     if (file && (!file.isFile() || file.nlink !== 1)) throw new Error("The Testnet database must be a separate regular file.");
   }
+  // A second host name for services on the same private network (for example the MCP container
+  // calling "app:4173"). It only ever reaches the public, read-only validator.
+  const internalHost = env.GENOMAP_INTERNAL_HOST || null;
+  if (internalHost && !/^[a-z0-9-]+:\d{1,5}$/.test(internalHost)) {
+    throw new Error("Set GENOMAP_INTERNAL_HOST as a service name and port, for example app:4173.");
+  }
   mkdirSync(dirname(databasePath), { recursive: true });
-  return { host, port, origin, databasePath, authSecret, network };
+  return { host, port, origin, databasePath, authSecret, network, internalHost };
 }

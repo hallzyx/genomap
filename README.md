@@ -44,6 +44,36 @@ Create a separate `.env` on the server. For a reverse proxy that terminates HTTP
 
 Have the proxy preserve the public `Host` header. Do not expose the internal HTTP port directly to the Internet. Persist `.pilot-data/` (or the directory containing your configured SQLite path) across restarts.
 
+## Deploy with Docker Compose
+
+`docker-compose.yml` builds one image and runs two services behind a reverse proxy such as Traefik (for example on Dokploy). It publishes **no host ports**; the proxy routes to the internal ports.
+
+| Service | Internal port | What it is |
+| --- | --- | --- |
+| `app` | 4173 | Website and API. Point your domain here. |
+| `mcp` | 4174 | MCP server at `/mcp` (health at `/health`). Optional: give it a domain only if agents need to reach it. |
+
+1. Set these variables in your deploy platform (or a private `.env` next to the compose file):
+
+   ```dotenv
+   GENOMAP_PUBLIC_ORIGIN=https://genomap.example.com
+   GENOMAP_AUTH_SECRET=<random, at least 32 characters>
+   GENOMAP_STELLAR_ISSUER_SECRET=<S... seed of the TESTNET publisher account>
+   # Optional: GENOMAP_STELLAR_CONTRACT_ID=<another contract>
+   ```
+
+   `GENOMAP_PUBLIC_ORIGIN` must match the domain exactly (https, no trailing slash). Requests with any other `Host` get `421`.
+2. Deploy, then attach your domain to the `app` service on port `4173`.
+3. Create the first moderator once, from a terminal inside the `app` container:
+
+   ```sh
+   GENOMAP_MODERATOR_EMAIL=you@example.com GENOMAP_MODERATOR_PASSWORD='a long password' node server/bootstrap.js
+   ```
+
+Accounts and marks live in the `genomap-data` volume, so they survive redeploys. Back it up, and do not remove it with `docker compose down -v`.
+
+Notes: the MCP service has no authentication or rate limit of its own. Behind a proxy, the sign-in rate limit (100 requests per minute) is shared by all visitors because the app sees the proxy's address.
+
 ## Try the roles
 
 1. Create a builder account. Claim a username, then link a wallet. With Freighter installed, **Connect Freighter** does it in one step; **Use another wallet** lets you paste an address and a signature.

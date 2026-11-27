@@ -52,7 +52,7 @@ function dateOnly(value) {
   return value;
 }
 
-export async function createPilot({ databasePath, origin, authSecret, chain = null }) {
+export async function createPilot({ databasePath, origin, authSecret, chain = null, internalHost = null }) {
   const { db, auth } = await openIdentity({ databasePath, origin, authSecret });
   const store = createStore(db);
   const app = express();
@@ -60,7 +60,9 @@ export async function createPilot({ databasePath, origin, authSecret, chain = nu
   app.disable("x-powered-by");
   app.use((req, res, next) => {
     // Accept only the configured host, including when accessed through a reverse proxy.
-    if (req.headers.host !== new URL(origin).host) {
+    const internalRead = internalHost && req.headers.host === internalHost &&
+      req.method === "GET" && req.path.startsWith("/api/validate/");
+    if (req.headers.host !== new URL(origin).host && !internalRead) {
       return res.status(421).end();
     }
     res.set({

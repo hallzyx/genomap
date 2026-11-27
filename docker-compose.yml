@@ -1,0 +1,53 @@
+# Production deploy behind a reverse proxy (Traefik, for example Dokploy).
+# No host ports are published: the proxy reaches the containers on their internal ports.
+#   app -> 4173 (the website and API)      mcp -> 4174 (optional, path /mcp)
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    init: true
+    environment:
+      GENOMAP_HOST: 0.0.0.0
+      GENOMAP_PORT: "4173"
+      # Exact public URL of the app, https and no trailing slash.
+      GENOMAP_PUBLIC_ORIGIN: ${GENOMAP_PUBLIC_ORIGIN:?Set the public https origin, for example https://genomap.example.com}
+      GENOMAP_AUTH_SECRET: ${GENOMAP_AUTH_SECRET:?Set a random secret of at least 32 characters}
+      # Lets the mcp service read the public validator over the private network.
+      GENOMAP_INTERNAL_HOST: app:4173
+      GENOMAP_STELLAR_NETWORK: testnet
+      GENOMAP_STELLAR_CONTRACT_ID: ${GENOMAP_STELLAR_CONTRACT_ID:-CBELLGK73SCFWDK7CRASWOHHCUPB23AYTHQHDLJ3K3W5MONI3Y5KQUV6}
+      # Secret seed (S...) of the TESTNET publisher account. Never a Mainnet key.
+      GENOMAP_STELLAR_ISSUER_SECRET: ${GENOMAP_STELLAR_ISSUER_SECRET:?Set the Testnet publisher secret seed}
+    volumes:
+      - genomap-data:/app/.pilot-data
+    expose:
+      - "4173"
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get({host:'127.0.0.1',port:4173,path:'/api/validate/healthcheck',headers:{host:'app:4173'}},r=>process.exit(r.statusCode===404?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  mcp:
+    build: .
+    command: ["node", "mcp/index.js", "--http"]
+    restart: unless-stopped
+    init: true
+    environment:
+      GENOMAP_URL: http://app:4173
+      GENOMAP_MCP_HOST: 0.0.0.0
+      GENOMAP_MCP_PORT: "4174"
+    expose:
+      - "4174"
+    depends_on:
+      app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4174/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  genomap-data:

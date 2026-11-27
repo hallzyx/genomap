@@ -1,0 +1,12 @@
+# Only what the image needs. Never send secrets or local data to the build.
+**
+!package.json
+!package-lock.json
+!vite.config.js
+!web/**
+!server/**
+!mcp/**
+!assets/**
+**/*.test.js
+**/.env
+**/.env.*

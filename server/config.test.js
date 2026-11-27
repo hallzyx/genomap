@@ -95,3 +95,24 @@ test("the reverse-proxy path still enforces the canonical host and origin withou
   assert.equal(signup.status, 200);
   assert.ok(signup.cookies?.some((cookie) => /; secure(?:;|$)/i.test(cookie)));
 });
+
+test("the internal host only reaches the public validator", async (context) => {
+  const { app, db } = await createPilot({ databasePath: ":memory:", origin: publicOrigin, authSecret: authSecret(), internalHost: "app:4173" });
+  const server = app.listen(0, "127.0.0.1");
+  context.after(async () => {
+    await new Promise((resolve) => server.close(resolve));
+    db.close();
+  });
+  await new Promise((resolve) => server.once("listening", resolve));
+  const status = (path, host, method = "GET") => new Promise((resolve, reject) => {
+    request({ hostname: "127.0.0.1", port: server.address().port, path, method, headers: { host } }, (res) => {
+      res.resume();
+      res.once("end", () => resolve(res.statusCode));
+    }).once("error", reject).end();
+  });
+  assert.equal(await status("/api/validate/nobody", "app:4173"), 404);
+  assert.equal(await status("/api/validate/nobody", "other:4173"), 421);
+  assert.equal(await status("/api/me", "app:4173"), 421);
+  assert.equal(await status("/api/validate/nobody", "app:4173", "POST"), 421);
+  assert.throws(() => readConfig({ GENOMAP_INTERNAL_HOST: "http://app" }), /GENOMAP_INTERNAL_HOST/);
+});
