@@ -64,11 +64,14 @@ Have the proxy preserve the public `Host` header. Do not expose the internal HTT
 
    `GENOMAP_PUBLIC_ORIGIN` must match the domain exactly (https, no trailing slash). Requests with any other `Host` get `421`.
 2. Deploy, then attach your domain to the `app` service on port `4173`.
-3. Create the first moderator once, from a terminal inside the `app` container:
+3. Create the first moderator by adding two more variables and deploying (no terminal needed):
 
-   ```sh
-   GENOMAP_MODERATOR_EMAIL=you@example.com GENOMAP_MODERATOR_PASSWORD='a long password' node server/bootstrap.js
+   ```dotenv
+   GENOMAP_MODERATOR_EMAIL=you@example.com
+   GENOMAP_MODERATOR_PASSWORD=<12 to 128 characters>
    ```
+
+   The app creates the account on startup if the email is new, and says so in its log. It never promotes or changes an existing account. After the first sign-in, remove `GENOMAP_MODERATOR_PASSWORD` and redeploy.
 
 Accounts and marks live in the `genomap-data` volume, so they survive redeploys. Back it up, and do not remove it with `docker compose down -v`.
 

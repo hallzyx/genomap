@@ -18,6 +18,9 @@ services:
       GENOMAP_STELLAR_CONTRACT_ID: ${GENOMAP_STELLAR_CONTRACT_ID:-CBELLGK73SCFWDK7CRASWOHHCUPB23AYTHQHDLJ3K3W5MONI3Y5KQUV6}
       # Secret seed (S...) of the TESTNET publisher account. Never a Mainnet key.
       GENOMAP_STELLAR_ISSUER_SECRET: ${GENOMAP_STELLAR_ISSUER_SECRET:?Set the Testnet publisher secret seed}
+      # Optional: the moderator is created on startup if this email does not exist yet.
+      GENOMAP_MODERATOR_EMAIL: ${GENOMAP_MODERATOR_EMAIL:-}
+      GENOMAP_MODERATOR_PASSWORD: ${GENOMAP_MODERATOR_PASSWORD:-}
     volumes:
       - genomap-data:/app/.pilot-data
     expose:

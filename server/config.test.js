@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import { mkdtempSync, rmdirSync, unlinkSync, writeFileSync } from "node:fs";
@@ -7,6 +7,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 import { createPilot } from "./app.js";
+import { ensureModerator } from "./auth.js";
 import { readConfig } from "./config.js";
 
 const publicOrigin = "https://genomap.example.test";
@@ -115,4 +116,18 @@ test("the internal host only reaches the public validator", async (context) => {
   assert.equal(await status("/api/me", "app:4173"), 421);
   assert.equal(await status("/api/validate/nobody", "app:4173", "POST"), 421);
   assert.throws(() => readConfig({ GENOMAP_INTERNAL_HOST: "http://app" }), /GENOMAP_INTERNAL_HOST/);
+});
+
+test("the startup moderator is created once and never promotes an existing account", async (context) => {
+  const pilot = await createPilot({ databasePath: ":memory:", origin: publicOrigin, authSecret: authSecret() });
+  context.after(() => pilot.db.close());
+  const password = authSecret();
+  assert.equal(await ensureModerator(pilot, undefined, undefined), null);
+  assert.equal(await ensureModerator(pilot, "", ""), null);
+  assert.match(await ensureModerator(pilot, "mod@example.test", "short"), /not created/);
+  assert.match(await ensureModerator(pilot, "mod@example.test", password), /created/);
+  assert.match(await ensureModerator(pilot, "MOD@example.test", password), /already exists/);
+  await pilot.auth.api.signUpEmail({ body: { name: "Someone", email: "someone@example.test", password }, headers: new Headers({ origin: publicOrigin }) });
+  assert.match(await ensureModerator(pilot, "someone@example.test", password), /never promoted/);
+  assert.equal(pilot.store.profile(pilot.store.findUser("someone@example.test").id).role, "learner");
 });

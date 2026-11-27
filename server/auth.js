@@ -27,6 +27,28 @@ export async function openIdentity({ databasePath, origin, authSecret }) {
   }
 }
 
+/**
+ * Startup version for deploys without a terminal: create the moderator from the environment once.
+ * It is safe to run on every boot, never promotes or changes an existing account, and never stops
+ * the server. Returns a message for the log, or null when the variables are not set.
+ */
+export async function ensureModerator(pilot, email, password) {
+  if (!email && !password) return null;
+  const login = typeof email === "string" ? email.trim().toLowerCase() : "";
+  const existing = login && pilot.store.findUser(login);
+  if (existing) {
+    return pilot.store.profile(existing.id).role === "moderator"
+      ? "Moderator account already exists; nothing changed."
+      : "GENOMAP_MODERATOR_EMAIL belongs to a regular account, which is never promoted. Use a new email.";
+  }
+  try {
+    await bootstrapModerator(pilot, email, password);
+    return "Moderator account created. You can now remove GENOMAP_MODERATOR_PASSWORD.";
+  } catch (error) {
+    return `Moderator account not created: ${error.message}`;
+  }
+}
+
 export async function bootstrapModerator({ auth, store, origin }, email, password) {
   const login = typeof email === "string" ? email.trim().toLowerCase() : "";
   if (!login || typeof password !== "string" || password.length < 12 || password.length > 128) {
